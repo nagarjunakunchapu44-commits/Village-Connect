@@ -1,0 +1,157 @@
+/* =========================================================
+   VILLAGE CONNECT - RESPONSIVE STYLES
+   ========================================================= */
+
+/* Tablets */
+
+@media (max-width: 1000px) {
+
+    .auth-page .auth-container {
+        grid-template-columns: 1fr;
+        max-width: 600px;
+    }
+
+    .auth-page .auth-info {
+        padding: 35px;
+    }
+
+    .auth-page .auth-card {
+        padding: 35px;
+    }
+
+    .admin-stats,
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .admin-filters {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .complaints-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+
+    .auth-page .auth-container {
+        width: 94%;
+        margin: 20px auto;
+        border-radius: 16px;
+    }
+
+    .auth-page .auth-info {
+        padding: 28px 22px;
+    }
+
+    .auth-page .auth-info h1 {
+        font-size: 30px;
+    }
+
+    .auth-page .auth-card {
+        padding: 28px 22px;
+    }
+
+    .admin-layout,
+    .dashboard-container,
+    .complaints-container,
+    .map-container {
+        width: 92%;
+    }
+
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-stats,
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .complaints-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .complaint-meta {
+        grid-template-columns: 1fr;
+    }
+
+    .complaint-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-hero {
+        padding: 28px 22px;
+    }
+
+    .dashboard-hero h1 {
+        font-size: 27px;
+    }
+
+    #map {
+        height: 500px;
+    }
+
+}
+
+
+/* Small Mobile */
+
+@media (max-width: 480px) {
+
+    .auth-page .auth-info {
+        padding: 24px 18px;
+    }
+
+    .auth-page .auth-card {
+        padding: 24px 18px;
+    }
+
+    .admin-card,
+    .dashboard-section,
+    .complaint-detail-card {
+        padding: 18px;
+    }
+
+    .admin-actions {
+        width: 100%;
+    }
+
+    .admin-btn {
+        flex: 1;
+    }
+
+    .map-controls {
+        flex-direction: column;
+    }
+
+    .map-controls select,
+    .map-controls input,
+    .map-button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #map {
+        height: 420px;
+    }
+
+}

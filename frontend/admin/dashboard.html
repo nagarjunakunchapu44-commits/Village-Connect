@@ -1,0 +1,603 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Village Connect - Admin Dashboard</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6ed;
+            color: #26352a;
+        }
+
+        header {
+            background: #1e5631;
+            color: white;
+            padding: 18px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        header h1 { margin: 0; font-size: 22px; }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-name { font-size: 14px; }
+
+        .logout-button {
+            background: #dc2626;
+            color: white;
+            border: 0;
+            border-radius: 7px;
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover { background: #b91c1c; }
+
+        .container {
+            max-width: 1250px;
+            margin: 32px auto;
+            padding: 0 22px;
+        }
+
+        .welcome { margin-bottom: 25px; }
+
+        .welcome h2 {
+            margin: 0 0 7px;
+            color: #1e5631;
+            font-size: 27px;
+        }
+
+        .welcome p { margin: 0; color: #66736a; }
+
+        /* SUMMARY */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 22px 15px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(30, 60, 35, .07);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 31px;
+            color: #1e5631;
+        }
+
+        .stat-card p {
+            margin: 8px 0 0;
+            color: #68736b;
+            font-weight: bold;
+        }
+
+        .stat-card.pending h3 { color: #ca8a04; }
+        .stat-card.forwarded h3 { color: #7c3aed; }
+        .stat-card.progress h3 { color: #2563eb; }
+        .stat-card.resolved h3 { color: #16a34a; }
+
+        /* REPORT PANELS */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+
+        .panel {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(30, 60, 35, .07);
+        }
+
+        .panel h2 {
+            margin: 0 0 15px;
+            color: #1e5631;
+            font-size: 20px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 0;
+            border-bottom: 1px solid #edf0eb;
+        }
+
+        .stat-row:last-child { border-bottom: 0; }
+
+        .stat-label { font-weight: bold; }
+
+        .stat-value {
+            min-width: 42px;
+            text-align: center;
+            padding: 6px 11px;
+            border-radius: 20px;
+            background: #e5e7eb;
+            font-weight: bold;
+        }
+
+        .category-road { background: #dbeafe; color: #1d4ed8; }
+        .category-drainage { background: #ede9fe; color: #6d28d9; }
+        .category-garbage { background: #fef3c7; color: #92400e; }
+        .category-water { background: #cffafe; color: #155e75; }
+        .category-other { background: #e5e7eb; color: #374151; }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-forwarded { background: #ede9fe; color: #6d28d9; }
+        .status-progress { background: #dbeafe; color: #1d4ed8; }
+        .status-resolved { background: #dcfce7; color: #166534; }
+
+        /* RECENT COMPLAINTS */
+        .recent-panel { margin-bottom: 28px; }
+
+        .complaint-item {
+            border: 1px solid #e8ece6;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .complaint-item:hover {
+            box-shadow: 0 4px 14px rgba(0,0,0,.06);
+        }
+
+        .complaint-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .complaint-number {
+            font-weight: bold;
+            color: #1e5631;
+        }
+
+        .complaint-details {
+            margin-top: 10px;
+            color: #59645c;
+            line-height: 1.7;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .severity { background: #fee2e2; color: #991b1b; }
+
+        .view-button {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 9px 14px;
+            background: #1e5631;
+            color: white;
+            text-decoration: none;
+            border-radius: 7px;
+            font-size: 13px;
+        }
+
+        .view-button:hover { background: #174326; }
+
+        /* DASHBOARD FEATURE CARDS */
+        .actions-heading {
+            margin: 0 0 18px;
+            color: #1e5631;
+            font-size: 23px;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .action-card {
+            display: block;
+            min-height: 205px;
+            padding: 28px 30px;
+            background: white;
+            color: inherit;
+            text-decoration: none;
+            border-radius: 22px;
+            box-shadow: 0 8px 25px rgba(30, 60, 35, .08);
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(30, 60, 35, .13);
+        }
+
+        .action-icon {
+            display: block;
+            font-size: 43px;
+            margin-bottom: 18px;
+        }
+
+        .action-card h3 {
+            margin: 0 0 12px;
+            color: #1e5631;
+            font-size: 22px;
+        }
+
+        .action-card p {
+            margin: 0;
+            color: #606b63;
+            font-size: 17px;
+            line-height: 1.55;
+        }
+
+        .loading, .empty {
+            text-align: center;
+            padding: 25px;
+            color: #68736b;
+        }
+
+        .error {
+            color: #991b1b;
+            background: #fee2e2;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        footer {
+            text-align: center;
+            color: #778078;
+            padding: 28px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 1000px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+            .action-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 700px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .two-column { grid-template-columns: 1fr; }
+            .action-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 500px) {
+            .container { padding: 0 13px; margin-top: 22px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .stat-card { padding: 17px 10px; }
+            .stat-card h3 { font-size: 26px; }
+            .panel { padding: 18px; }
+            .action-card { min-height: 175px; padding: 23px; }
+            .action-card h3 { font-size: 20px; }
+            .action-card p { font-size: 15px; }
+            .complaint-top { align-items: flex-start; flex-direction: column; }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <h1>Village Connect — Admin Dashboard</h1>
+    <div class="header-right">
+        <span id="adminName" class="admin-name">Admin</span>
+        <button type="button" class="logout-button" onclick="logout()">Logout</button>
+    </div>
+</header>
+
+<main class="container">
+    <section class="welcome">
+        <h2>Dashboard</h2>
+        <p>Monitor village complaints and manage your community services.</p>
+    </section>
+
+    <section class="stats-grid">
+        <div class="stat-card">
+            <h3 id="totalCount">0</h3>
+            <p>Total Complaints</p>
+        </div>
+        <div class="stat-card pending">
+            <h3 id="pendingCount">0</h3>
+            <p>Pending</p>
+        </div>
+        <div class="stat-card forwarded">
+            <h3 id="forwardedCount">0</h3>
+            <p>Forwarded</p>
+        </div>
+        <div class="stat-card progress">
+            <h3 id="progressCount">0</h3>
+            <p>In Progress</p>
+        </div>
+        <div class="stat-card resolved">
+            <h3 id="resolvedCount">0</h3>
+            <p>Resolved</p>
+        </div>
+    </section>
+
+    <section class="two-column">
+        <div class="panel">
+            <h2>Complaints by Category</h2>
+            <div id="categoryStats" class="loading">Loading...</div>
+        </div>
+
+        <div class="panel">
+            <h2>Complaints by Status</h2>
+            <div id="statusStats" class="loading">Loading...</div>
+        </div>
+    </section>
+
+    <section class="panel recent-panel">
+        <h2>Recent Complaints</h2>
+        <div id="recentComplaints" class="loading">Loading complaints...</div>
+    </section>
+
+    <section>
+        <h2 class="actions-heading">Admin Services</h2>
+
+        <div class="action-grid">
+            <a href="/admin/complaints.html" class="action-card">
+                <span class="action-icon">📋</span>
+                <h3>Manage Complaints</h3>
+                <p>View complaints submitted by residents and manage their progress.</p>
+            </a>
+
+            <a href="/admin/volunteers.html" class="action-card">
+                <span class="action-icon">🤝</span>
+                <h3>Manage Volunteers</h3>
+                <p>Review volunteer requests and manage community volunteers.</p>
+            </a>
+
+            <a href="/admin/analytics.html" class="action-card">
+                <span class="action-icon">📊</span>
+                <h3>Reports & Analytics</h3>
+                <p>View village activity, complaint statistics and reports.</p>
+            </a>
+
+            <a href="/complaint-map.html" class="action-card">
+                <span class="action-icon">🗺️</span>
+                <h3>Complaint Map</h3>
+                <p>View reported complaints and their locations on the map.</p>
+            </a>
+
+            <a href="/admin/users.html" class="action-card">
+                <span class="action-icon">👥</span>
+                <h3>Manage Users</h3>
+                <p>View registered users and promote eligible residents to officials.</p>
+            </a>
+
+            <a href="/admin/villages.html" class="action-card">
+                <span class="action-icon">🏡</span>
+                <h3>Manage Villages</h3>
+                <p>View and manage village information.</p>
+            </a>
+
+            <a href="/admin/events.html" class="action-card">
+                <span class="action-icon">📅</span>
+                <h3>Community Events</h3>
+                <p>View and manage village events and activities.</p>
+            </a>
+
+            <a href="/admin/polls.html" class="action-card">
+                <span class="action-icon">📊</span>
+                <h3>Community Polls</h3>
+                <p>Manage polls and review residents' opinions.</p>
+            </a>
+        </div>
+    </section>
+</main>
+
+<footer>Village Connect Community Service Platform</footer>
+
+<script>
+    const token = localStorage.getItem("token");
+    const userString = localStorage.getItem("user");
+    let user = null;
+
+    try {
+        user = JSON.parse(userString || "null");
+    } catch (error) {
+        user = null;
+    }
+
+    if (!token || !user || !["admin", "official"].includes(user.role)) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login.html";
+    }
+
+    document.getElementById("adminName").textContent = user.name || "Admin";
+
+    function logout() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login.html";
+    }
+
+    function escapeHTML(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    async function loadDashboard() {
+        try {
+            const response = await fetch("/api/complaints/all", {
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Unable to load complaints");
+            }
+
+            const complaints = Array.isArray(data.complaints) ? data.complaints : [];
+
+            const pending = complaints.filter(c => c.status === "Pending").length;
+            const forwarded = complaints.filter(c => c.status === "Forwarded").length;
+            const inProgress = complaints.filter(c => c.status === "In Progress").length;
+            const resolved = complaints.filter(c => c.status === "Resolved").length;
+
+            document.getElementById("totalCount").textContent = complaints.length;
+            document.getElementById("pendingCount").textContent = pending;
+            document.getElementById("forwardedCount").textContent = forwarded;
+            document.getElementById("progressCount").textContent = inProgress;
+            document.getElementById("resolvedCount").textContent = resolved;
+
+            const categoryCounts = {
+                Road: 0,
+                Drainage: 0,
+                Garbage: 0,
+                Waterlogging: 0,
+                Other: 0
+            };
+
+            complaints.forEach(complaint => {
+                const category = complaint.category;
+                if (Object.prototype.hasOwnProperty.call(categoryCounts, category)) {
+                    categoryCounts[category]++;
+                } else {
+                    categoryCounts.Other++;
+                }
+            });
+
+            const categoryClasses = {
+                Road: "category-road",
+                Drainage: "category-drainage",
+                Garbage: "category-garbage",
+                Waterlogging: "category-water",
+                Other: "category-other"
+            };
+
+            document.getElementById("categoryStats").innerHTML =
+                Object.entries(categoryCounts).map(([name, count]) => `
+                    <div class="stat-row">
+                        <span class="stat-label">${name}</span>
+                        <span class="stat-value ${categoryClasses[name]}">${count}</span>
+                    </div>
+                `).join("");
+
+            const statusRows = [
+                ["Pending", pending, "status-pending"],
+                ["Forwarded", forwarded, "status-forwarded"],
+                ["In Progress", inProgress, "status-progress"],
+                ["Resolved", resolved, "status-resolved"]
+            ];
+
+            document.getElementById("statusStats").innerHTML =
+                statusRows.map(([name, count, cssClass]) => `
+                    <div class="stat-row">
+                        <span class="stat-label">${name}</span>
+                        <span class="stat-value ${cssClass}">${count}</span>
+                    </div>
+                `).join("");
+
+            const recentContainer = document.getElementById("recentComplaints");
+
+            if (complaints.length === 0) {
+                recentContainer.innerHTML = '<div class="empty">No complaints found.</div>';
+                return;
+            }
+
+            const recentComplaints = [...complaints]
+                .sort((a, b) =>
+                    new Date(b.created_at || 0) - new Date(a.created_at || 0)
+                )
+                .slice(0, 5);
+
+            recentContainer.innerHTML = "";
+
+            recentComplaints.forEach(complaint => {
+                let statusClass = "status-pending";
+
+                if (complaint.status === "Forwarded") statusClass = "status-forwarded";
+                else if (complaint.status === "In Progress") statusClass = "status-progress";
+                else if (complaint.status === "Resolved") statusClass = "status-resolved";
+
+                const item = document.createElement("div");
+                item.className = "complaint-item";
+
+                const createdDate = complaint.created_at
+                    ? new Date(complaint.created_at).toLocaleString()
+                    : "-";
+
+                item.innerHTML = `
+                    <div class="complaint-top">
+                        <span class="complaint-number">
+                            ${escapeHTML(complaint.complaint_number || "Complaint")}
+                        </span>
+                        <span class="badge ${statusClass}">
+                            ${escapeHTML(complaint.status || "-")}
+                        </span>
+                    </div>
+
+                    <div class="complaint-details">
+                        <strong>Category:</strong> ${escapeHTML(complaint.category || "-")}<br>
+                        <strong>Severity:</strong> ${escapeHTML(complaint.severity || "-")}<br>
+                        <strong>Area:</strong> ${escapeHTML(complaint.area || "-")}<br>
+                        <strong>Resident:</strong> ${escapeHTML(complaint.user_name || "-")}<br>
+                        <strong>Created:</strong> ${escapeHTML(createdDate)}
+                    </div>
+
+                    <a href="/admin/complaint-details.html?id=${encodeURIComponent(complaint.id)}"
+                       class="view-button">View Complaint</a>
+                `;
+
+                recentContainer.appendChild(item);
+            });
+
+        } catch (error) {
+            console.error("Dashboard error:", error);
+
+            document.getElementById("categoryStats").innerHTML =
+                `<div class="error">${escapeHTML(error.message)}</div>`;
+
+            document.getElementById("statusStats").innerHTML =
+                '<div class="error">Unable to load statistics.</div>';
+
+            document.getElementById("recentComplaints").innerHTML =
+                `<div class="error">${escapeHTML(error.message)}</div>`;
+        }
+    }
+
+    if (token && user) {
+        loadDashboard();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Village Connect - Admin Analytics</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            color: #222;
+        }
+
+        .navbar {
+            background: #166534;
+            color: white;
+            padding: 16px 4%;
+        }
+
+        .nav-inner {
+            max-width: 1250px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            color: white;
+            text-decoration: none;
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .nav-links a, .nav-logout {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,.15);
+            border: 0;
+            border-radius: 6px;
+            padding: 9px 12px;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover, .nav-links a.active,
+        .nav-logout:hover {
+            background: rgba(255,255,255,.3);
+        }
+
+        .admin-layout {
+            width: 92%;
+            max-width: 1250px;
+            margin: 30px auto;
+            min-height: 75vh;
+        }
+
+        .admin-header h1 {
+            color: #166534;
+            margin-bottom: 8px;
+        }
+
+        .admin-header p {
+            color: #666;
+        }
+
+        .analytics-village-selector,
+        .admin-card,
+        .admin-stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+            margin-bottom: 20px;
+        }
+
+        .analytics-village-selector label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .analytics-village-selector select {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .selected-village-name {
+            color: #166534;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+            gap: 15px;
+        }
+
+        .admin-stat-card {
+            margin: 0 0 20px;
+            min-width: 0;
+        }
+
+        .complaint-stat-card {
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .complaint-stat-card:hover,
+        .complaint-stat-card:focus {
+            transform: translateY(-3px);
+            outline: 2px solid #86b98a;
+            box-shadow: 0 5px 14px rgba(22,101,52,.18);
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            color: #166534;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .admin-card h2 {
+            color: #166534;
+            margin-top: 0;
+        }
+
+        .admin-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            min-width: 650px;
+            border-collapse: collapse;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .admin-table th {
+            background: #f0f7f1;
+            color: #166534;
+        }
+
+        .admin-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .analytics-empty {
+            color: #777;
+            padding: 15px 0;
+        }
+
+        .analytics-message {
+            display: none;
+            padding: 12px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .landing-footer {
+            background: #166534;
+            color: white;
+            padding: 22px 4%;
+            text-align: center;
+        }
+
+        @media(max-width:700px) {
+            .navbar { padding: 15px; }
+            .nav-inner { align-items: flex-start; }
+            .admin-layout { width: 95%; }
+            .admin-stats { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media(max-width:380px) {
+            .admin-stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="nav-inner">
+        <a href="dashboard.html" class="logo">Village Connect</a>
+
+        <nav class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="complaints.html">Complaints</a>
+            <a href="villages.html">Villages</a>
+            <a href="events.html">Events</a>
+            <a href="polls.html">Polls</a>
+            <a href="analytics.html" class="active">Analytics</a>
+            <button class="nav-logout" onclick="logout()">Logout</button>
+        </nav>
+    </div>
+</header>
+
+<main class="admin-layout">
+
+    <section class="admin-header">
+        <h1>Analytics</h1>
+        <p>Overview of village complaints, activities and community participation.</p>
+    </section>
+
+    <section class="analytics-village-selector">
+        <label for="villageSelect">Select Village</label>
+
+        <select id="villageSelect" disabled>
+            <option value="">Loading villages...</option>
+        </select>
+
+        <div id="selectedVillageName" class="selected-village-name"></div>
+    </section>
+
+    <!-- CLICKABLE STATISTICS -->
+
+    <section class="admin-stats">
+
+        <div class="admin-stat-card complaint-stat-card"
+             role="button" tabindex="0"
+             onclick="filterComplaints('all')">
+            <div class="stat-label">Total Complaints</div>
+            <div class="stat-value" id="totalComplaints">0</div>
+        </div>
+
+        <div class="admin-stat-card complaint-stat-card"
+             role="button" tabindex="0"
+             onclick="filterComplaints('pending')">
+            <div class="stat-label">Pending</div>
+            <div class="stat-value" id="pendingComplaints">0</div>
+        </div>
+
+        <div class="admin-stat-card complaint-stat-card"
+             role="button" tabindex="0"
+             onclick="filterComplaints('forwarded')">
+            <div class="stat-label">Forwarded</div>
+            <div class="stat-value" id="forwardedComplaints">0</div>
+        </div>
+
+        <div class="admin-stat-card complaint-stat-card"
+             role="button" tabindex="0"
+             onclick="filterComplaints('in progress')">
+            <div class="stat-label">In Progress</div>
+            <div class="stat-value" id="progressComplaints">0</div>
+        </div>
+
+        <div class="admin-stat-card complaint-stat-card"
+             role="button" tabindex="0"
+             onclick="filterComplaints('resolved')">
+            <div class="stat-label">Completed / Resolved</div>
+            <div class="stat-value" id="resolvedComplaints">0</div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-label">Villages</div>
+            <div class="stat-value" id="totalVillages">0</div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-label">Events</div>
+            <div class="stat-value" id="totalEvents">0</div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-label">Volunteers</div>
+            <div class="stat-value" id="totalVolunteers">0</div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-label">Approved Volunteers</div>
+            <div class="stat-value" id="approvedVolunteers">0</div>
+        </div>
+
+    </section>
+
+    <section class="admin-card">
+        <h2>Complaints by Category</h2>
+        <div id="categoryStats"></div>
+    </section>
+
+    <section class="admin-card">
+        <h2>Complaint Status</h2>
+        <div id="statusStats"></div>
+    </section>
+
+    <section class="admin-card">
+        <h2>Complaint Severity</h2>
+        <div id="severityStats"></div>
+    </section>
+
+    <section class="admin-card">
+        <h2>Complaints by Village</h2>
+        <div id="villageStats"></div>
+    </section>
+
+    <!-- FILTERED COMPLAINTS TABLE -->
+
+    <section class="admin-card" id="complaintsTableSection">
+
+        <h2 id="complaintsTableTitle">Recent Complaints</h2>
+
+        <p id="complaintsFilterHint" style="color:#666;">
+            Click a complaint status card to see matching complaints in this village.
+        </p>
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Complaint</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Severity</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+
+                <tbody id="recentComplaints">
+                    <tr>
+                        <td colspan="5">Select a village to view complaints.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+    <div id="analyticsMessage" class="analytics-message"></div>
+
+</main>
+
+<footer class="landing-footer">
+    <p>Village Connect - Admin Analytics</p>
+</footer>
+
+<script>
+const API_URL = "/api";
+const token = localStorage.getItem("token");
+const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+
+let allVillages = [];
+let allComplaints = [];
+let allEvents = [];
+let allVolunteers = [];
+
+let selectedVillageId = null;
+let activeComplaintStatus = "all";
+
+
+/* AUTHENTICATION */
+
+if (!token || !storedUser) {
+    window.location.href = "../login.html";
+} else if (String(storedUser.role || "").toLowerCase() !== "admin") {
+    window.location.href = "../home.html";
+}
+
+
+/* API HELPER */
+
+async function fetchAPI(url) {
+    const response = await fetch(`${API_URL}${url}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    let result;
+
+    try {
+        result = await response.json();
+    } catch {
+        throw new Error("Invalid server response.");
+    }
+
+    if (!response.ok) {
+        throw new Error(result.message || "Request failed");
+    }
+
+    return result;
+}
+
+
+/* HTML ESCAPING */
+
+function escapeHTML(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* BAR CHART */
+
+function createBar(name, value, total) {
+    const percentage = total > 0
+        ? Math.min(100, Math.round((value / total) * 100))
+        : 0;
+
+    return `
+        <div style="margin-bottom:18px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <strong>${escapeHTML(name)}</strong>
+                <span>${value}</span>
+            </div>
+
+            <div style="width:100%;height:10px;background:#e2e8f0;border-radius:10px;overflow:hidden;">
+                <div style="width:${percentage}%;height:100%;background:#166534;"></div>
+            </div>
+        </div>
+    `;
+}
+
+
+function showEmpty(containerId, message) {
+    document.getElementById(containerId).innerHTML =
+        `<p class="analytics-empty">${escapeHTML(message)}</p>`;
+}
+
+
+/* LOAD DATA */
+
+async function loadAnalytics() {
+    const message = document.getElementById("analyticsMessage");
+
+    try {
+        message.style.display = "none";
+
+        const [
+            complaintsResult,
+            villagesResult,
+            eventsResult,
+            volunteersResult
+        ] = await Promise.all([
+            fetchAPI("/complaints/all"),
+            fetchAPI("/villages"),
+            fetchAPI("/events"),
+            fetchAPI("/volunteers")
+        ]);
+
+        allComplaints = complaintsResult.complaints || [];
+        allVillages = villagesResult.villages || [];
+        allEvents = eventsResult.events || [];
+        allVolunteers = volunteersResult.volunteers || [];
+
+        if (!allVillages.length) {
+            throw new Error("No villages found.");
+        }
+
+        populateVillageDropdown();
+
+    } catch (error) {
+        console.error("Analytics error:", error);
+
+        message.style.display = "block";
+        message.style.background = "#fee2e2";
+        message.style.color = "#991b1b";
+        message.textContent = "Unable to load analytics: " + error.message;
+
+        document.getElementById("villageSelect").disabled = true;
+    }
+}
+
+
+/* VILLAGE DROPDOWN */
+
+function populateVillageDropdown() {
+    const select = document.getElementById("villageSelect");
+
+    select.innerHTML = `
+        <option value="">Select a village</option>
+        ${allVillages.map(village => `
+            <option value="${escapeHTML(village.id)}">
+                ${escapeHTML(village.name)}
+            </option>
+        `).join("")}
+    `;
+
+    select.disabled = false;
+
+    select.addEventListener("change", function() {
+        selectedVillageId = this.value || null;
+        activeComplaintStatus = "all";
+
+        document.getElementById("complaintsTableTitle").textContent =
+            "Recent Complaints";
+
+        document.getElementById("complaintsFilterHint").textContent =
+            "Click a complaint status card to see matching complaints in this village.";
+
+        renderAnalytics();
+    });
+
+    if (allVillages.length > 0) {
+        selectedVillageId = String(allVillages[0].id);
+        select.value = selectedVillageId;
+        renderAnalytics();
+    }
+}
+
+
+/* RENDER SELECTED VILLAGE */
+
+function renderAnalytics() {
+    if (!selectedVillageId) return;
+
+    const selectedVillage = allVillages.find(
+        village => String(village.id) === String(selectedVillageId)
+    );
+
+    if (!selectedVillage) return;
+
+    const complaints = allComplaints.filter(
+        complaint => String(complaint.village_id) === String(selectedVillageId)
+    );
+
+    const events = allEvents.filter(
+        event => String(event.village_id) === String(selectedVillageId)
+    );
+
+    const volunteers = allVolunteers.filter(
+        volunteer => String(volunteer.village_id) === String(selectedVillageId)
+    );
+
+    document.getElementById("selectedVillageName").textContent =
+        "Currently viewing: " + selectedVillage.name;
+
+    renderBasicStats(complaints, events, volunteers);
+    renderCategoryStats(complaints);
+    renderStatusStats(complaints);
+    renderSeverityStats(complaints);
+
+    renderVillageStats(complaints, selectedVillage.name);
+    renderRecentComplaints(complaints);
+}
+
+
+/* BASIC STATISTICS */
+
+function renderBasicStats(complaints, events, volunteers) {
+    const statusOf = complaint =>
+        String(complaint.status || "").trim().toLowerCase();
+
+    document.getElementById("totalComplaints").textContent =
+        complaints.length;
+
+    document.getElementById("pendingComplaints").textContent =
+        complaints.filter(c => statusOf(c) === "pending").length;
+
+    document.getElementById("forwardedComplaints").textContent =
+        complaints.filter(c => statusOf(c) === "forwarded").length;
+
+    document.getElementById("progressComplaints").textContent =
+        complaints.filter(c => statusOf(c) === "in progress").length;
+
+    document.getElementById("resolvedComplaints").textContent =
+        complaints.filter(c =>
+            statusOf(c) === "resolved" || statusOf(c) === "completed"
+        ).length;
+
+    document.getElementById("totalVillages").textContent = 1;
+    document.getElementById("totalEvents").textContent = events.length;
+    document.getElementById("totalVolunteers").textContent = volunteers.length;
+
+    document.getElementById("approvedVolunteers").textContent =
+        volunteers.filter(v => Number(v.approved) === 1).length;
+}
+
+
+/* CATEGORY STATISTICS */
+
+function renderCategoryStats(complaints) {
+    const categories = {};
+
+    complaints.forEach(complaint => {
+        const category = complaint.category || "Unknown";
+        categories[category] = (categories[category] || 0) + 1;
+    });
+
+    const entries = Object.entries(categories);
+
+    if (!entries.length) {
+        showEmpty("categoryStats", "No complaint data available.");
+        return;
+    }
+
+    document.getElementById("categoryStats").innerHTML =
+        entries.sort((a, b) => b[1] - a[1])
+            .map(item => createBar(item[0], item[1], complaints.length))
+            .join("");
+}
+
+
+/* STATUS STATISTICS */
+
+function renderStatusStats(complaints) {
+    const statuses = {};
+
+    complaints.forEach(complaint => {
+        const status = complaint.status || "Unknown";
+        statuses[status] = (statuses[status] || 0) + 1;
+    });
+
+    const entries = Object.entries(statuses);
+
+    if (!entries.length) {
+        showEmpty("statusStats", "No status data available.");
+        return;
+    }
+
+    document.getElementById("statusStats").innerHTML =
+        entries.sort((a, b) => b[1] - a[1])
+            .map(item => createBar(item[0], item[1], complaints.length))
+            .join("");
+}
+
+
+/* SEVERITY STATISTICS */
+
+function renderSeverityStats(complaints) {
+    const severities = {};
+
+    complaints.forEach(complaint => {
+        const severity = complaint.severity || "Unknown";
+        severities[severity] = (severities[severity] || 0) + 1;
+    });
+
+    const entries = Object.entries(severities);
+
+    if (!entries.length) {
+        showEmpty("severityStats", "No severity data available.");
+        return;
+    }
+
+    document.getElementById("severityStats").innerHTML =
+        entries.sort((a, b) => b[1] - a[1])
+            .map(item => createBar(item[0], item[1], complaints.length))
+            .join("");
+}
+
+
+/* VILLAGE STATISTICS */
+
+function renderVillageStats(complaints, villageName) {
+    if (!complaints.length) {
+        showEmpty(
+            "villageStats",
+            "No complaint data available for " + villageName + "."
+        );
+        return;
+    }
+
+    document.getElementById("villageStats").innerHTML =
+        createBar(villageName, complaints.length, complaints.length);
+}
+
+
+/* CLICK A COMPLAINT CARD */
+
+function filterComplaints(status) {
+    activeComplaintStatus = String(status || "all").toLowerCase();
+
+    if (!selectedVillageId) return;
+
+    const villageComplaints = allComplaints.filter(
+        complaint => String(complaint.village_id) === String(selectedVillageId)
+    );
+
+    renderRecentComplaints(villageComplaints);
+
+    let title;
+
+    if (activeComplaintStatus === "all") {
+        title = "All Complaints";
+    } else if (activeComplaintStatus === "resolved") {
+        title = "Completed / Resolved Complaints";
+    } else {
+        title = activeComplaintStatus.charAt(0).toUpperCase() +
+                activeComplaintStatus.slice(1) + " Complaints";
+    }
+
+    document.getElementById("complaintsTableTitle").textContent = title;
+
+    document.getElementById("complaintsFilterHint").textContent =
+        activeComplaintStatus === "all"
+            ? "Showing all complaints for the selected village."
+            : "Showing only " + activeComplaintStatus +
+              " complaints for the selected village.";
+
+    document.getElementById("complaintsTableSection").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+}
+
+
+/* DISPLAY FILTERED COMPLAINTS */
+
+function renderRecentComplaints(complaints) {
+    const container = document.getElementById("recentComplaints");
+
+    const filtered = complaints.filter(complaint => {
+        const status = String(complaint.status || "").trim().toLowerCase();
+
+        if (activeComplaintStatus === "all") return true;
+
+        if (activeComplaintStatus === "resolved") {
+            return status === "resolved" || status === "completed";
+        }
+
+        return status === activeComplaintStatus;
+    }).sort((a, b) =>
+        new Date(b.created_at) - new Date(a.created_at)
+    );
+
+    if (!filtered.length) {
+        container.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    No matching complaints found for this village.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    // Display every complaint matching the selected status.
+    container.innerHTML = filtered.map(complaint => `
+        <tr>
+            <td>${escapeHTML(complaint.complaint_number || complaint.id || "-")}</td>
+            <td>${escapeHTML(complaint.category || "-")}</td>
+            <td>${escapeHTML(complaint.status || "-")}</td>
+            <td>${escapeHTML(complaint.severity || "-")}</td>
+            <td>
+                ${complaint.created_at
+                    ? escapeHTML(new Date(complaint.created_at).toLocaleDateString())
+                    : "-"
+                }
+            </td>
+        </tr>
+    `).join("");
+}
+
+
+/* LOGOUT */
+
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "../login.html";
+}
+
+
+/* START */
+
+if (
+    token &&
+    storedUser &&
+    String(storedUser.role || "").toLowerCase() === "admin"
+) {
+    loadAnalytics();
+}
+
+</script>
+
+</body>
+</html>

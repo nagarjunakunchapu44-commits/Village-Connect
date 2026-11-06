@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Village Connect - Community Platform</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+
+        body {
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f7f8ef;
+
+            color: #26351f;
+        }
+
+
+        /* NAVBAR */
+
+        nav {
+            position: sticky;
+
+            top: 0;
+
+            z-index: 1000;
+
+            background: #31572c;
+
+            color: white;
+
+            padding: 16px 7%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            box-shadow:
+                0 3px 12px
+                rgba(0,0,0,0.12);
+        }
+
+
+        .logo {
+            font-size: 24px;
+
+            font-weight: bold;
+
+            white-space: nowrap;
+        }
+
+
+        .nav-links {
+            display: flex;
+
+            align-items: center;
+
+            gap: 25px;
+        }
+
+
+        .nav-links a {
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 15px;
+        }
+
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+
+        .login-btn {
+            border: 1px solid white;
+
+            padding:
+                8px 16px;
+
+            border-radius: 7px;
+        }
+
+
+        .register-btn {
+            background: white;
+
+            color: #31572c !important;
+
+            padding:
+                9px 17px;
+
+            border-radius: 7px;
+
+            font-weight: bold;
+        }
+
+
+        /* HERO */
+
+        .hero {
+            min-height: 600px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding:
+                70px 7%;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef5e8,
+                    #f8f5e9
+                );
+        }
+
+
+        .hero-content {
+            max-width: 1100px;
+
+            width: 100%;
+
+            display: grid;
+
+            grid-template-columns:
+                1.2fr
+                0.8fr;
+
+            gap: 50px;
+
+            align-items: center;
+        }
+
+
+        .hero-text h1 {
+            font-size:
+                clamp(38px, 6vw, 68px);
+
+            line-height: 1.05;
+
+            color: #31572c;
+
+            margin-bottom: 22px;
+        }
+
+
+        .hero-text h1 span {
+            color: #588157;
+        }
+
+
+        .hero-text p {
+            font-size: 19px;
+
+            line-height: 1.7;
+
+            color: #596455;
+
+            max-width: 650px;
+
+            margin-bottom: 30px;
+        }
+
+
+        .hero-buttons {
+            display: flex;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .primary-btn,
+        .secondary-btn {
+            display: inline-block;
+
+            text-decoration: none;
+
+            padding:
+                14px 25px;
+
+            border-radius: 9px;
+
+            font-size: 16px;
+
+            font-weight: bold;
+        }
+
+
+        .primary-btn {
+            background: #31572c;
+
+            color: white;
+        }
+
+
+        .primary-btn:hover {
+            background: #244522;
+        }
+
+
+        .secondary-btn {
+            background: white;
+
+            color: #31572c;
+
+            border:
+                1px solid #31572c;
+        }
+
+
+        .secondary-btn:hover {
+            background: #eef5e8;
+        }
+
+
+        /* HERO CARD */
+
+        .hero-card {
+            background: white;
+
+            border-radius: 20px;
+
+            padding: 35px;
+
+            box-shadow:
+                0 15px 35px
+                rgba(0,0,0,0.1);
+        }
+
+
+        .hero-icon {
+            font-size: 65px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .hero-card h2 {
+            color: #31572c;
+
+            margin-bottom: 12px;
+        }
+
+
+        .hero-card p {
+            color: #666;
+
+            line-height: 1.6;
+
+            margin-bottom: 20px;
+        }
+
+
+        .mini-feature {
+            display: flex;
+
+            gap: 12px;
+
+            align-items: center;
+
+            padding: 12px;
+
+            background: #f5f7ed;
+
+            border-radius: 9px;
+
+            margin-top: 10px;
+        }
+
+
+        .mini-feature span:first-child {
+            font-size: 24px;
+        }
+
+
+        /* FEATURES */
+
+        .features {
+            padding:
+                80px 7%;
+        }
+
+
+        .section-title {
+            text-align: center;
+
+            margin-bottom: 45px;
+        }
+
+
+        .section-title h2 {
+            color: #31572c;
+
+            font-size: 34px;
+
+            margin-bottom: 10px;
+        }
+
+
+        .section-title p {
+            color: #666;
+
+            font-size: 16px;
+        }
+
+
+        .feature-grid {
+            max-width: 1100px;
+
+            margin: auto;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(220px, 1fr)
+                );
+
+            gap: 22px;
+        }
+
+
+        .feature-card {
+            background: white;
+
+            padding: 28px 22px;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 6px 20px
+                rgba(0,0,0,0.07);
+
+            transition:
+                transform 0.2s;
+        }
+
+
+        .feature-card:hover {
+            transform:
+                translateY(-5px);
+        }
+
+
+        .feature-icon {
+            font-size: 38px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .feature-card h3 {
+            color: #31572c;
+
+            margin-bottom: 10px;
+        }
+
+
+        .feature-card p {
+            color: #666;
+
+            line-height: 1.5;
+        }
+
+
+        /* HOW IT WORKS */
+
+        .how {
+            background: #31572c;
+
+            color: white;
+
+            padding:
+                80px 7%;
+        }
+
+
+        .how .section-title h2 {
+            color: white;
+        }
+
+
+        .how .section-title p {
+            color: #dce8d7;
+        }
+
+
+        .steps {
+            max-width: 1000px;
+
+            margin: auto;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(200px, 1fr)
+                );
+
+            gap: 25px;
+        }
+
+
+        .step {
+            text-align: center;
+
+            padding: 20px;
+        }
+
+
+        .step-number {
+            width: 55px;
+
+            height: 55px;
+
+            margin:
+                0 auto 18px;
+
+            border-radius: 50%;
+
+            background: white;
+
+            color: #31572c;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 22px;
+
+            font-weight: bold;
+        }
+
+
+        .step h3 {
+            margin-bottom: 10px;
+        }
+
+
+        .step p {
+            color: #dce8d7;
+
+            line-height: 1.5;
+        }
+
+
+        /* CTA */
+
+        .cta {
+            padding:
+                80px 20px;
+
+            text-align: center;
+
+            background: #f5f7ed;
+        }
+
+
+        .cta h2 {
+            color: #31572c;
+
+            font-size: 35px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .cta p {
+            color: #666;
+
+            margin-bottom: 25px;
+
+            font-size: 17px;
+        }
+
+
+        /* FOOTER */
+
+        footer {
+            background: #203b1d;
+
+            color: #dce8d7;
+
+            text-align: center;
+
+            padding: 30px 20px;
+        }
+
+
+        footer strong {
+            color: white;
+        }
+
+
+        @media (max-width: 800px) {
+
+            nav {
+                padding:
+                    14px 20px;
+            }
+
+
+            .nav-links {
+                gap: 10px;
+            }
+
+
+            .nav-links a:not(
+                .login-btn
+            ):not(
+                .register-btn
+            ) {
+                display: none;
+            }
+
+
+            .hero {
+                padding:
+                    55px 20px;
+            }
+
+
+            .hero-content {
+                grid-template-columns: 1fr;
+
+                gap: 30px;
+            }
+
+
+            .hero-text {
+                text-align: center;
+            }
+
+
+            .hero-text p {
+                margin-left: auto;
+
+                margin-right: auto;
+            }
+
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+        }
+
+
+        @media (max-width: 480px) {
+
+            .logo {
+                font-size: 19px;
+            }
+
+
+            .nav-links {
+                gap: 6px;
+            }
+
+
+            .login-btn,
+            .register-btn {
+                padding:
+                    7px 10px;
+
+                font-size: 13px;
+            }
+
+
+            .hero-text h1 {
+                font-size: 40px;
+            }
+
+
+            .hero-text p {
+                font-size: 16px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- NAVIGATION -->
+
+<nav>
+
+    <div class="logo">
+        🌱 Village Connect
+    </div>
+
+
+    <div class="nav-links">
+
+        <a href="#features">
+            Features
+        </a>
+
+        <a href="#how">
+            How It Works
+        </a>
+
+        <a
+            href="/login.html"
+            class="login-btn"
+        >
+            Login
+        </a>
+
+        <a
+            href="/register.html"
+            class="register-btn"
+        >
+            Register
+        </a>
+
+    </div>
+
+</nav>
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+
+        <div class="hero-text">
+
+            <h1>
+                Better Villages.
+                <span>
+                    Connected Communities.
+                </span>
+            </h1>
+
+
+            <p>
+
+                Village Connect is a digital
+                community platform that helps
+                residents report local problems,
+                communicate with their village,
+                track complaints and participate
+                in community development.
+
+            </p>
+
+
+            <div class="hero-buttons">
+
+                <a
+                    href="/register.html"
+                    class="primary-btn"
+                >
+                    Join Your Village
+                </a>
+
+
+                <a
+                    href="/login.html"
+                    class="secondary-btn"
+                >
+                    Login
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero-card">
+
+            <div class="hero-icon">
+                🏡
+            </div>
+
+
+            <h2>
+                Your Village, Your Voice
+            </h2>
+
+
+            <p>
+
+                Connect with people in your
+                village and work together to
+                make your community better.
+
+            </p>
+
+
+            <div class="mini-feature">
+
+                <span>
+                    📝
+                </span>
+
+                <span>
+                    Report village problems
+                </span>
+
+            </div>
+
+
+            <div class="mini-feature">
+
+                <span>
+                    🗺️
+                </span>
+
+                <span>
+                    View complaints on a map
+                </span>
+
+            </div>
+
+
+            <div class="mini-feature">
+
+                <span>
+                    💬
+                </span>
+
+                <span>
+                    Chat with your village
+                </span>
+
+            </div>
+
+
+            <div class="mini-feature">
+
+                <span>
+                    🤝
+                </span>
+
+                <span>
+                    Participate in community activities
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- FEATURES -->
+
+<section
+    class="features"
+    id="features"
+>
+
+    <div class="section-title">
+
+        <h2>
+            Everything Your Village Needs
+        </h2>
+
+        <p>
+            A single platform for community
+            communication and development.
+        </p>
+
+    </div>
+
+
+    <div class="feature-grid">
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                📝
+            </div>
+
+            <h3>
+                Report Complaints
+            </h3>
+
+            <p>
+                Report roads, drainage,
+                garbage, waterlogging and
+                other local issues.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                🗺️
+            </div>
+
+            <h3>
+                Complaint Map
+            </h3>
+
+            <p>
+                Find complaints registered
+                around your village using
+                an interactive map.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                💬
+            </div>
+
+            <h3>
+                Village Chat
+            </h3>
+
+            <p>
+                Communicate with residents
+                belonging to your village.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                📅
+            </div>
+
+            <h3>
+                Community Events
+            </h3>
+
+            <p>
+                Discover village events,
+                meetings and community
+                activities.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                📊
+            </div>
+
+            <h3>
+                Community Polls
+            </h3>
+
+            <p>
+                Share your opinion and
+                participate in village
+                decision-making activities.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                🤝
+            </div>
+
+            <h3>
+                Volunteers
+            </h3>
+
+            <p>
+                Join community volunteer
+                activities and help your
+                village.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                📈
+            </div>
+
+            <h3>
+                Village Analytics
+            </h3>
+
+            <p>
+                Understand complaint trends
+                and community development
+                through useful statistics.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                🏡
+            </div>
+
+            <h3>
+                Village Information
+            </h3>
+
+            <p>
+                Explore information and
+                activities related to
+                your village.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- HOW IT WORKS -->
+
+<section
+    class="how"
+    id="how"
+>
+
+    <div class="section-title">
+
+        <h2>
+            How Village Connect Works
+        </h2>
+
+        <p>
+            Simple steps to connect with
+            your community.
+        </p>
+
+    </div>
+
+
+    <div class="steps">
+
+
+        <div class="step">
+
+            <div class="step-number">
+                1
+            </div>
+
+            <h3>
+                Create Account
+            </h3>
+
+            <p>
+                Register with your name,
+                mobile number, village and
+                occupation.
+            </p>
+
+        </div>
+
+
+        <div class="step">
+
+            <div class="step-number">
+                2
+            </div>
+
+            <h3>
+                Report & Connect
+            </h3>
+
+            <p>
+                Report local problems and
+                communicate with people
+                from your village.
+            </p>
+
+        </div>
+
+
+        <div class="step">
+
+            <div class="step-number">
+                3
+            </div>
+
+            <h3>
+                Track Progress
+            </h3>
+
+            <p>
+                Track complaints and see
+                their status as authorities
+                work on them.
+            </p>
+
+        </div>
+
+
+        <div class="step">
+
+            <div class="step-number">
+                4
+            </div>
+
+            <h3>
+                Build Together
+            </h3>
+
+            <p>
+                Participate in events,
+                polls and volunteer activities
+                for your community.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- CTA -->
+
+<section class="cta">
+
+    <h2>
+        Ready to Connect With Your Village?
+    </h2>
+
+    <p>
+        Create your account and become
+        part of your digital village community.
+    </p>
+
+
+    <a
+        href="/register.html"
+        class="primary-btn"
+    >
+        Create Your Account
+    </a>
+
+</section>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <p>
+        <strong>
+            🌱 Village Connect
+        </strong>
+    </p>
+
+    <p style="margin-top:8px;">
+        Connecting communities. Building better villages.
+    </p>
+
+    <p style="margin-top:15px;font-size:13px;">
+        © 2026 Village Connect
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

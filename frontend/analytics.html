@@ -1,0 +1,536 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Village Analytics - Village Connect</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7ed;
+            color: #26351f;
+        }
+
+        nav {
+            background: #31572c;
+            color: white;
+            padding: 16px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .header, .card, .section, .loading {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        h1, h2 {
+            color: #31572c;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+        }
+
+        .village {
+            font-size: 22px;
+            font-weight: bold;
+            color: #31572c;
+            margin-top: 8px;
+        }
+
+        .role-label {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 7px 13px;
+            background: #e6f1df;
+            color: #31572c;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            margin-bottom: 0;
+        }
+
+        .number {
+            font-size: 38px;
+            font-weight: bold;
+            color: #31572c;
+            margin-bottom: 5px;
+        }
+
+        .label {
+            color: #666;
+        }
+
+        .row {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        .bar-container {
+            width: 100%;
+            height: 15px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 7px;
+        }
+
+        .bar {
+            height: 100%;
+            background: #31572c;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+
+        .error {
+            background: #ffe5e5;
+            color: #a40000;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .empty {
+            color: #777;
+            padding: 15px 0;
+        }
+
+        .refresh-btn {
+            background: #31572c;
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .refresh-btn:hover {
+            background: #244421;
+        }
+
+        @media(max-width: 600px) {
+            nav {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            nav a {
+                margin-left: 0;
+                margin-right: 12px;
+                display: inline-block;
+                margin-top: 10px;
+            }
+
+            .container {
+                width: 94%;
+            }
+
+            .number {
+                font-size: 32px;
+            }
+
+            .section, .header, .card {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav>
+    <div class="logo">🌱 Village Connect</div>
+
+    <div>
+        <a href="/home.html">Home</a>
+        <a href="/villages.html">My Village</a>
+        <a href="/map.html">Map</a>
+        <a href="/chat.html">Chat</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div id="loading" class="loading">
+        Loading your village analytics...
+    </div>
+
+    <div id="error" class="error"></div>
+
+    <div id="content" style="display:none;">
+
+        <div class="header">
+            <h1>📊 Village Analytics</h1>
+
+            <div id="villageName" class="village"></div>
+
+            <p style="margin-top:8px;color:#666;">
+                Analytics for your registered village only.
+            </p>
+
+            <div id="roleLabel" class="role-label"></div>
+
+            <br>
+
+            <button class="refresh-btn" onclick="loadAnalytics()">
+                🔄 Refresh Analytics
+            </button>
+        </div>
+
+        <div id="summaryCards" class="cards"></div>
+
+        <div class="section">
+            <h2>Complaint Status</h2>
+            <div id="statusStats" style="margin-top:15px;"></div>
+        </div>
+
+        <div class="section">
+            <h2>Complaint Categories</h2>
+            <div id="categoryStats" style="margin-top:15px;"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        window.location.href = "/login.html";
+    }
+
+    async function apiRequest(url) {
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+        });
+
+        let data;
+
+        try {
+            data = await response.json();
+        } catch {
+            throw new Error("The server returned an invalid response.");
+        }
+
+        if (response.status === 401) {
+            localStorage.removeItem("token");
+            window.location.href = "/login.html";
+            throw new Error("Your session has expired.");
+        }
+
+        if (!response.ok || data.success !== true) {
+            throw new Error(
+                data.message || "Unable to load analytics."
+            );
+        }
+
+        return data;
+    }
+
+    async function loadAnalytics() {
+        const loading = document.getElementById("loading");
+        const content = document.getElementById("content");
+        const errorBox = document.getElementById("error");
+
+        loading.style.display = "block";
+        content.style.display = "none";
+        errorBox.style.display = "none";
+
+        try {
+            // Get logged-in user.
+            const meData = await apiRequest("/api/auth/me");
+            const user = meData.user;
+
+            if (!user) {
+                throw new Error("Unable to identify logged-in user.");
+            }
+
+            const role = String(user.role || "").toLowerCase();
+            const villageId = Number(user.village_id);
+
+            if (!Number.isInteger(villageId) || villageId <= 0) {
+                throw new Error(
+                    "Your account is not linked to a village."
+                );
+            }
+
+            const roleNames = {
+                admin: "Administrator",
+                official: "Village Official",
+                resident: "Resident"
+            };
+
+            document.getElementById("roleLabel").textContent =
+                roleNames[role] || "User";
+
+            // Backend verifies that this user can access this village.
+            const data = await apiRequest(
+                `/api/villages/${encodeURIComponent(villageId)}`
+            );
+
+            const village = data.village;
+
+            if (!village) {
+                throw new Error("Village information not found.");
+            }
+
+            document.getElementById("villageName").textContent =
+                village.name || "My Village";
+
+            /*
+             * The corrected backend returns:
+             * data.statistics.status
+             * data.statistics.categories
+             * data.residents
+             */
+
+            const statistics = data.statistics || {};
+
+            const statusStats = Array.isArray(statistics.status)
+                ? statistics.status
+                : [];
+
+            const categoryStats = Array.isArray(statistics.categories)
+                ? statistics.categories
+                : [];
+
+            // Also support the summary fields returned by the village API.
+            const villageStatistics = village.statistics || {};
+
+            const totalFromStatuses = statusStats.reduce(
+                (sum, item) => sum + Number(item.count || 0),
+                0
+            );
+
+            const totalComplaints = Number(
+                villageStatistics.total_complaints ??
+                statistics.total_complaints ??
+                totalFromStatuses
+            );
+
+            const resolved = getStatusCount(statusStats, "Resolved");
+            const pending = getStatusCount(statusStats, "Pending");
+            const inProgress = getStatusCount(statusStats, "In Progress");
+            const forwarded = getStatusCount(statusStats, "Forwarded");
+
+            // Use the explicit backend resident count.
+            const residents = Number(
+                statistics.total_residents ??
+                village.total_residents ??
+                (Array.isArray(data.residents) ? data.residents.length : 0)
+            );
+
+            const resolutionRate = totalComplaints > 0
+                ? Math.round((resolved / totalComplaints) * 100)
+                : 0;
+
+            const summaryCards = [
+                { number: totalComplaints, label: "Total Complaints" },
+                { number: resolved, label: "Resolved Complaints" },
+                { number: pending, label: "Pending Complaints" },
+                { number: inProgress, label: "In Progress" },
+                { number: forwarded, label: "Forwarded Complaints" },
+                { number: residents, label: "Registered Residents" },
+                { number: resolutionRate + "%", label: "Resolution Rate" }
+            ];
+
+            document.getElementById("summaryCards").innerHTML =
+                summaryCards.map(item => `
+                    <div class="card">
+                        <div class="number">${escapeHtml(item.number)}</div>
+                        <div class="label">${escapeHtml(item.label)}</div>
+                    </div>
+                `).join("");
+
+            // Status chart.
+            const statusNames = [
+                "Pending",
+                "Forwarded",
+                "In Progress",
+                "Resolved"
+            ];
+
+            const statusCounts = statusNames.map(name => ({
+                name,
+                count: getStatusCount(statusStats, name)
+            }));
+
+            if (totalComplaints === 0) {
+                document.getElementById("statusStats").innerHTML = `
+                    <div class="empty">
+                        No complaints available for this village.
+                    </div>
+                `;
+            } else {
+                document.getElementById("statusStats").innerHTML =
+                    statusCounts.map(item => {
+                        const percentage = Math.round(
+                            (item.count / totalComplaints) * 100
+                        );
+
+                        return `
+                            <div class="row">
+                                <div style="width:100%;">
+                                    <div style="
+                                        display:flex;
+                                        justify-content:space-between;
+                                    ">
+                                        <span>${escapeHtml(item.name)}</span>
+                                        <b>${item.count} (${percentage}%)</b>
+                                    </div>
+
+                                    <div class="bar-container">
+                                        <div class="bar"
+                                             style="width:${percentage}%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join("");
+            }
+
+            // Category chart.
+            if (categoryStats.length === 0) {
+                document.getElementById("categoryStats").innerHTML = `
+                    <div class="empty">
+                        No complaint categories available.
+                    </div>
+                `;
+            } else {
+                const maximum = Math.max(
+                    ...categoryStats.map(item => Number(item.count || 0)),
+                    1
+                );
+
+                document.getElementById("categoryStats").innerHTML =
+                    categoryStats.map(item => {
+                        const count = Number(item.count || 0);
+                        const percentage = Math.round(
+                            (count / maximum) * 100
+                        );
+
+                        return `
+                            <div class="row">
+                                <div style="width:100%;">
+                                    <div style="
+                                        display:flex;
+                                        justify-content:space-between;
+                                    ">
+                                        <span>
+                                            ${escapeHtml(item.category || "Other")}
+                                        </span>
+                                        <b>${count}</b>
+                                    </div>
+
+                                    <div class="bar-container">
+                                        <div class="bar"
+                                             style="width:${percentage}%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join("");
+            }
+
+            loading.style.display = "none";
+            content.style.display = "block";
+
+        } catch (error) {
+            console.error("Analytics error:", error);
+
+            loading.style.display = "none";
+            content.style.display = "none";
+
+            errorBox.textContent =
+                error.message || "Unable to load analytics.";
+
+            errorBox.style.display = "block";
+        }
+    }
+
+    function getStatusCount(statusStats, status) {
+        const item = statusStats.find(row =>
+            String(row.status || "").trim().toLowerCase() ===
+            status.toLowerCase()
+        );
+
+        return item ? Number(item.count || 0) : 0;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    loadAnalytics();
+</script>
+
+</body>
+</html>

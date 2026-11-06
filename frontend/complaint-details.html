@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Complaint Details - Village Connect</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 18px 25px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin: 25px auto;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 16px;
+            background: #374151;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+
+        .detail {
+            margin: 12px 0;
+            line-height: 1.6;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.resolved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status.in-progress {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status.forwarded {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .images img {
+            width: 220px;
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .history-item {
+            position: relative;
+            padding: 15px 15px 15px 30px;
+            margin-bottom: 15px;
+            border-left: 3px solid #2563eb;
+            background: #f8fafc;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .history-item::before {
+            content: "";
+            position: absolute;
+            left: -8px;
+            top: 18px;
+            width: 13px;
+            height: 13px;
+            background: #2563eb;
+            border-radius: 50%;
+        }
+
+        .history-status {
+            font-weight: bold;
+            color: #1d4ed8;
+            font-size: 17px;
+        }
+
+        .history-remark {
+            margin-top: 7px;
+            color: #444;
+        }
+
+        .history-date {
+            margin-top: 7px;
+            color: #777;
+            font-size: 13px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #555;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .empty {
+            color: #777;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Village Connect</h1>
+    </div>
+
+    <div class="container">
+
+        <a href="/complaints.html" class="back-btn">
+            ← Back to My Complaints
+        </a>
+
+        <div id="loading" class="loading">
+            Loading complaint...
+        </div>
+
+        <div id="error" class="error" style="display:none;"></div>
+
+        <div id="complaintContainer" style="display:none;">
+
+            <!-- Complaint Details -->
+            <div class="card">
+
+                <h2>Complaint Details</h2>
+
+                <div class="detail">
+                    <span class="label">Complaint Number:</span>
+                    <span id="complaintNumber"></span>
+                </div>
+
+                <div class="detail">
+                    <span class="label">Category:</span>
+                    <span id="category"></span>
+                </div>
+
+                <div class="detail">
+                    <span class="label">Severity:</span>
+                    <span id="severity"></span>
+                </div>
+
+                <div class="detail">
+                    <span class="label">Area:</span>
+                    <span id="area"></span>
+                </div>
+
+                <div class="detail">
+                    <span class="label">Landmark:</span>
+                    <span id="landmark"></span>
+                </div>
+
+                <div class="detail">
+                    <span class="label">Description:</span>
+                    <span id="description"></span>
+                </div>
+
+                <div class="detail">
+                    <span class="label">Status:</span>
+                    <span id="status" class="status"></span>
+                </div>
+
+                <div class="detail">
+                    <span class="label">Created:</span>
+                    <span id="createdAt"></span>
+                </div>
+
+                <div class="detail">
+                    <span class="label">Latitude:</span>
+                    <span id="latitude"></span>
+                </div>
+
+                <div class="detail">
+                    <span class="label">Longitude:</span>
+                    <span id="longitude"></span>
+                </div>
+
+            </div>
+
+
+            <!-- Complaint Images -->
+            <div class="card">
+
+                <h2>Complaint Photos</h2>
+
+                <div id="images" class="images"></div>
+
+            </div>
+
+
+            <!-- Status History -->
+            <div class="card">
+
+                <h2>Status History</h2>
+
+                <div id="history">
+                    <div class="loading">
+                        Loading status history...
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const token = localStorage.getItem("token");
+
+        const params = new URLSearchParams(window.location.search);
+
+        const complaintId = params.get("id");
+
+
+        // Check login
+        if (!token) {
+
+            window.location.href = "/login.html";
+
+        }
+
+
+        // Check complaint ID
+        if (!complaintId) {
+
+            showError("Complaint ID is missing.");
+
+        } else {
+
+            loadComplaint();
+
+            loadHistory();
+
+        }
+
+
+        // =========================
+        // LOAD COMPLAINT
+        // =========================
+
+        async function loadComplaint() {
+
+            try {
+
+                const response = await fetch(
+                    `/api/complaints/${complaintId}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+
+
+                const data = await response.json();
+
+
+                if (!response.ok || !data.success) {
+
+                    throw new Error(
+                        data.message || "Unable to load complaint"
+                    );
+
+                }
+
+
+                const complaint = data.complaint;
+
+
+                document.getElementById("complaintNumber").textContent =
+                    complaint.complaint_number || "-";
+
+                document.getElementById("category").textContent =
+                    complaint.category || "-";
+
+                document.getElementById("severity").textContent =
+                    complaint.severity || "-";
+
+                document.getElementById("area").textContent =
+                    complaint.area || "-";
+
+                document.getElementById("landmark").textContent =
+                    complaint.landmark || "-";
+
+                document.getElementById("description").textContent =
+                    complaint.description || "-";
+
+                document.getElementById("latitude").textContent =
+                    complaint.latitude ?? "-";
+
+                document.getElementById("longitude").textContent =
+                    complaint.longitude ?? "-";
+
+
+                document.getElementById("createdAt").textContent =
+                    formatDate(complaint.created_at);
+
+
+                // Status
+                const statusElement =
+                    document.getElementById("status");
+
+                statusElement.textContent =
+                    complaint.status || "Pending";
+
+                statusElement.className =
+                    "status " +
+                    getStatusClass(complaint.status);
+
+
+                // Images
+                displayImages(data.images || []);
+
+
+                document.getElementById("loading").style.display =
+                    "none";
+
+                document.getElementById("complaintContainer").style.display =
+                    "block";
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showError(error.message);
+
+            }
+
+        }
+
+
+        // =========================
+        // LOAD STATUS HISTORY
+        // =========================
+
+        async function loadHistory() {
+
+            const historyContainer =
+                document.getElementById("history");
+
+
+            try {
+
+                const response = await fetch(
+                    `/api/complaints/${complaintId}/history`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+
+
+                const data = await response.json();
+
+
+                if (!response.ok || !data.success) {
+
+                    throw new Error(
+                        data.message || "Unable to load status history"
+                    );
+
+                }
+
+
+                if (!data.history || data.history.length === 0) {
+
+                    historyContainer.innerHTML =
+                        `<div class="empty">
+                            No status history available.
+                         </div>`;
+
+                    return;
+
+                }
+
+
+                historyContainer.innerHTML = "";
+
+
+                data.history.forEach(item => {
+
+                    const historyItem =
+                        document.createElement("div");
+
+                    historyItem.className = "history-item";
+
+
+                    historyItem.innerHTML = `
+
+                        <div class="history-status">
+                            ${escapeHtml(item.new_status || "-")}
+                        </div>
+
+                        <div class="history-remark">
+                            ${
+                                item.remark
+                                    ? escapeHtml(item.remark)
+                                    : "Status updated"
+                            }
+                        </div>
+
+                        <div class="history-date">
+                            ${formatDate(item.created_at)}
+                        </div>
+
+                    `;
+
+
+                    historyContainer.appendChild(historyItem);
+
+                });
+
+
+            } catch (error) {
+
+                console.error("History error:", error);
+
+                historyContainer.innerHTML =
+                    `<div class="error">
+                        Unable to load status history.
+                        <br>
+                        ${escapeHtml(error.message)}
+                     </div>`;
+
+            }
+
+        }
+
+
+        // =========================
+        // DISPLAY IMAGES
+        // =========================
+
+        function displayImages(images) {
+
+            const container =
+                document.getElementById("images");
+
+
+            if (!images || images.length === 0) {
+
+                container.innerHTML =
+                    `<div class="empty">
+                        No photos uploaded.
+                     </div>`;
+
+                return;
+
+            }
+
+
+            container.innerHTML = "";
+
+
+            images.forEach(image => {
+
+                const img =
+                    document.createElement("img");
+
+                img.src =
+                    image.image_url ||
+                    image.url ||
+                    image;
+
+                img.alt = "Complaint Photo";
+
+                container.appendChild(img);
+
+            });
+
+        }
+
+
+        // =========================
+        // STATUS CLASS
+        // =========================
+
+        function getStatusClass(status) {
+
+            if (!status) {
+                return "pending";
+            }
+
+
+            return status
+                .toLowerCase()
+                .replace(/\s+/g, "-");
+
+        }
+
+
+        // =========================
+        // DATE FORMAT
+        // =========================
+
+        function formatDate(date) {
+
+            if (!date) {
+                return "-";
+            }
+
+
+            return new Date(date).toLocaleString(
+                "en-IN",
+                {
+                    dateStyle: "medium",
+                    timeStyle: "short"
+                }
+            );
+
+        }
+
+
+        // =========================
+        // ESCAPE HTML
+        // =========================
+
+        function escapeHtml(value) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent = value;
+
+            return div.innerHTML;
+
+        }
+
+
+        // =========================
+        // ERROR
+        // =========================
+
+        function showError(message) {
+
+            document.getElementById("loading").style.display =
+                "none";
+
+            const error =
+                document.getElementById("error");
+
+            error.textContent = message;
+
+            error.style.display = "block";
+
+        }
+
+    </script>
+
+</body>
+</html>

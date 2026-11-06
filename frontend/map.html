@@ -1,0 +1,1033 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Village Map - Village Connect</title>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7ed;
+            color: #26351f;
+            min-height: 100vh;
+        }
+
+        nav {
+            background: #31572c;
+            color: white;
+            padding: 16px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .header-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .header-card h1 {
+            color: #31572c;
+            margin-bottom: 8px;
+        }
+
+        .village-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #31572c;
+            margin-top: 10px;
+        }
+
+        .map-card {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        }
+
+        #map {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        select {
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            background: white;
+        }
+
+        .button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 7px;
+            background: #31572c;
+            color: white;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: #244522;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .error {
+            background: #ffe5e5;
+            color: #a40000;
+        }
+
+        .info {
+            background: #e8f2e5;
+            color: #31572c;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+
+        .map-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        @media (max-width: 600px) {
+            nav {
+                padding: 15px 5%;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            nav a {
+                margin-left: 8px;
+                font-size: 13px;
+            }
+
+            .container {
+                width: 94%;
+            }
+
+            #map {
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav>
+    <div class="logo">
+        🌱 Village Connect
+    </div>
+
+    <div>
+        <a href="/home.html">Home</a>
+        <a href="/complaints.html">Complaints</a>
+        <a href="/chat.html">Chat</a>
+        <a href="/analytics.html">Analytics</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="header-card">
+
+        <h1 id="mapTitle">🗺️ My Village Complaint Map</h1>
+
+        <p id="mapDescription">
+            Complaints reported in your registered village:
+        </p>
+
+        <div class="village-name" id="villageName">
+            Loading village...
+        </div>
+
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div class="map-card">
+
+        <div class="filters">
+
+            <select id="statusFilter">
+                <option value="All">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Forwarded">Forwarded</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+            </select>
+
+            <select id="categoryFilter">
+                <option value="All">All Categories</option>
+                <option value="Road">Road</option>
+                <option value="Drainage">Drainage</option>
+                <option value="Garbage">Garbage</option>
+                <option value="Waterlogging">Waterlogging</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <select id="villageFilter" style="display:none;">
+                <option value="All">All Villages</option>
+            </select>
+
+            <button
+                class="button"
+                onclick="showMyLocation()">
+                📍 My Location
+            </button>
+
+        </div>
+
+        <div
+            id="mapLegend"
+            class="map-legend"
+            style="display:none;">
+        </div>
+
+        <div id="loading" class="loading">
+            Loading your village map...
+        </div>
+
+        <div id="map"></div>
+
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        window.location.href = "/login.html";
+    }
+
+    let currentUser = null;
+    let village = null;
+    let villages = [];
+    let complaints = [];
+
+    let map = null;
+    let markersLayer = null;
+
+    // Only admin can see all villages.
+    let isAdmin = false;
+
+    const villageColors = [
+        "#e53935",
+        "#1565c0",
+        "#2e7d32",
+        "#8e24aa",
+        "#ef6c00",
+        "#00838f",
+        "#ad1457",
+        "#6d4c41",
+        "#3949ab",
+        "#558b2f",
+        "#c62828",
+        "#0277bd"
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Village colour
+    |--------------------------------------------------------------------------
+    */
+
+    function getVillageColor(villageId) {
+
+        const id = Number(villageId) || 0;
+
+        return villageColors[
+            Math.abs(id) % villageColors.length
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Coordinate validation
+    |--------------------------------------------------------------------------
+    */
+
+    function hasCoordinates(item) {
+
+        if (!item) return false;
+
+        const lat = Number(item.latitude);
+        const lng = Number(item.longitude);
+
+        return (
+            item.latitude !== null &&
+            item.longitude !== null &&
+            item.latitude !== "" &&
+            item.longitude !== "" &&
+            Number.isFinite(lat) &&
+            Number.isFinite(lng) &&
+            lat >= -90 &&
+            lat <= 90 &&
+            lng >= -180 &&
+            lng <= 180
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | API helper
+    |--------------------------------------------------------------------------
+    */
+
+    async function apiRequest(url) {
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                Authorization: "Bearer " + token
+            }
+        });
+
+        let data;
+
+        try {
+            data = await response.json();
+        } catch (error) {
+            throw new Error("Invalid server response.");
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to load information."
+            );
+        }
+
+        return data;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Load map data
+    |--------------------------------------------------------------------------
+    */
+
+    async function loadMapData() {
+
+        try {
+
+            if (!token) return;
+
+            if (typeof L === "undefined") {
+                throw new Error(
+                    "Map library could not be loaded. Check your internet connection."
+                );
+            }
+
+            // Identify logged-in user.
+
+            const meData = await apiRequest("/api/auth/me");
+
+            if (!meData.success || !meData.user) {
+                throw new Error(
+                    "Unable to identify logged-in user."
+                );
+            }
+
+            currentUser = meData.user;
+
+            const role = String(
+                currentUser.role || ""
+            ).trim().toLowerCase();
+
+            // IMPORTANT: officials are NOT admins.
+            isAdmin = role === "admin";
+
+            if (isAdmin) {
+
+                document.getElementById("mapTitle").textContent =
+                    "🗺️ All Villages Complaint Map";
+
+                document.getElementById("mapDescription").textContent =
+                    "Complaints reported across all registered villages:";
+
+                document.getElementById("villageName").textContent =
+                    "All Registered Villages";
+
+                document.getElementById("loading").textContent =
+                    "Loading all villages and complaints...";
+
+            } else {
+
+                document.getElementById("mapTitle").textContent =
+                    "🗺️ My Village Complaint Map";
+
+                document.getElementById("mapDescription").textContent =
+                    "Complaints reported in your registered village:";
+
+                document.getElementById("loading").textContent =
+                    "Loading your village map...";
+            }
+
+            // Both endpoints enforce access on the backend.
+
+            const [villageData, complaintData] =
+                await Promise.all([
+                    apiRequest("/api/map/villages"),
+                    apiRequest("/api/map/complaints")
+                ]);
+
+            if (!villageData.success) {
+                throw new Error(
+                    villageData.message ||
+                    "Unable to load village locations."
+                );
+            }
+
+            if (!complaintData.success) {
+                throw new Error(
+                    complaintData.message ||
+                    "Unable to load complaint locations."
+                );
+            }
+
+            villages = Array.isArray(villageData.villages)
+                ? villageData.villages
+                : [];
+
+            complaints = Array.isArray(complaintData.complaints)
+                ? complaintData.complaints
+                : [];
+
+            if (isAdmin) {
+                loadAdminDisplay();
+            } else {
+                loadNonAdminDisplay();
+            }
+
+            initializeMap();
+
+        } catch (error) {
+
+            console.error("Map loading error:", error);
+
+            showMessage(
+                error.message || "Unable to load village map.",
+                "error"
+            );
+
+            document.getElementById("loading").style.display =
+                "none";
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin display
+    |--------------------------------------------------------------------------
+    */
+
+    function loadAdminDisplay() {
+
+        const villageFilter =
+            document.getElementById("villageFilter");
+
+        villageFilter.style.display = "inline-block";
+
+        villageFilter.innerHTML =
+            '<option value="All">All Villages</option>' +
+            villages.map(item => `
+                <option value="${Number(item.id)}">
+                    ${escapeHtml(item.name)}
+                </option>
+            `).join("");
+
+        renderLegend();
+
+        if (villages.length === 0) {
+            showMessage(
+                "No registered villages with map coordinates were found.",
+                "info"
+            );
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Non-admin display
+    |--------------------------------------------------------------------------
+    */
+
+    function loadNonAdminDisplay() {
+
+        // Backend returns only this user's village.
+
+        village = villages.length > 0
+            ? villages[0]
+            : null;
+
+        // Never display the all-village filter to non-admin users.
+
+        document.getElementById("villageFilter").style.display =
+            "none";
+
+        document.getElementById("mapLegend").style.display =
+            "none";
+
+        if (village) {
+
+            document.getElementById("villageName").textContent =
+                village.name;
+
+        } else {
+
+            document.getElementById("villageName").textContent =
+                "Village location unavailable";
+
+            showMessage(
+                "No village location was returned for your account. Check your village assignment and village coordinates.",
+                "info"
+            );
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Initialize map
+    |--------------------------------------------------------------------------
+    */
+
+    function initializeMap() {
+
+        document.getElementById("loading").style.display =
+            "none";
+
+        let latitude = 16.5062;
+        let longitude = 80.6480;
+        let zoom = 12;
+
+        if (isAdmin) {
+
+            const villagesWithCoordinates =
+                villages.filter(hasCoordinates);
+
+            if (villagesWithCoordinates.length > 0) {
+
+                latitude =
+                    villagesWithCoordinates.reduce(
+                        (sum, item) =>
+                            sum + Number(item.latitude),
+                        0
+                    ) / villagesWithCoordinates.length;
+
+                longitude =
+                    villagesWithCoordinates.reduce(
+                        (sum, item) =>
+                            sum + Number(item.longitude),
+                        0
+                    ) / villagesWithCoordinates.length;
+
+                zoom = 9;
+            }
+
+        } else if (village && hasCoordinates(village)) {
+
+            latitude = Number(village.latitude);
+            longitude = Number(village.longitude);
+
+            zoom = 14;
+        }
+
+        map = L.map("map").setView(
+            [latitude, longitude],
+            zoom
+        );
+
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                maxZoom: 19,
+                attribution:
+                    "&copy; OpenStreetMap contributors"
+            }
+        ).addTo(map);
+
+        // Only admins receive and display all village markers.
+
+        if (isAdmin) {
+
+            villages.forEach(item => {
+
+                if (!hasCoordinates(item)) return;
+
+                const lat = Number(item.latitude);
+                const lng = Number(item.longitude);
+
+                const color = getVillageColor(item.id);
+
+                L.circleMarker(
+                    [lat, lng],
+                    {
+                        radius: 9,
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.85,
+                        weight: 2
+                    }
+                )
+                .addTo(map)
+                .bindPopup(`
+                    <b>${escapeHtml(item.name)}</b><br>
+                    Registered Village
+                `);
+            });
+
+        } else if (village && hasCoordinates(village)) {
+
+            L.marker([
+                Number(village.latitude),
+                Number(village.longitude)
+            ])
+            .addTo(map)
+            .bindPopup(`
+                <b>${escapeHtml(village.name)}</b><br>
+                Your registered village
+            `);
+        }
+
+        markersLayer = L.layerGroup().addTo(map);
+
+        renderComplaints();
+
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 300);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Village colour legend
+    |--------------------------------------------------------------------------
+    */
+
+    function renderLegend() {
+
+        const legend =
+            document.getElementById("mapLegend");
+
+        if (!isAdmin) {
+            legend.style.display = "none";
+            return;
+        }
+
+        legend.style.display = "flex";
+
+        legend.innerHTML = villages.map(item => {
+
+            const color = getVillageColor(item.id);
+
+            return `
+                <div class="legend-item">
+                    <span
+                        class="legend-dot"
+                        style="background:${color};">
+                    </span>
+
+                    ${escapeHtml(item.name)}
+                </div>
+            `;
+
+        }).join("");
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Render complaint markers
+    |--------------------------------------------------------------------------
+    */
+
+    function renderComplaints() {
+
+        if (!markersLayer || !map) return;
+
+        markersLayer.clearLayers();
+
+        const status =
+            document.getElementById("statusFilter").value;
+
+        const category =
+            document.getElementById("categoryFilter").value;
+
+        const villageFilter =
+            document.getElementById("villageFilter").value;
+
+        const filtered = complaints.filter(function(complaint) {
+
+            const statusMatch =
+                status === "All" ||
+                String(complaint.status || "").toLowerCase() ===
+                status.toLowerCase();
+
+            const categoryMatch =
+                category === "All" ||
+                String(complaint.category || "").toLowerCase() ===
+                category.toLowerCase();
+
+            const villageMatch =
+                !isAdmin ||
+                villageFilter === "All" ||
+                Number(complaint.village_id) ===
+                    Number(villageFilter);
+
+            return (
+                statusMatch &&
+                categoryMatch &&
+                villageMatch
+            );
+        });
+
+        const bounds = [];
+
+        filtered.forEach(function(complaint) {
+
+            if (!hasCoordinates(complaint)) return;
+
+            const lat = Number(complaint.latitude);
+            const lng = Number(complaint.longitude);
+
+            bounds.push([lat, lng]);
+
+            let marker;
+
+            if (isAdmin) {
+
+                const color =
+                    getVillageColor(complaint.village_id);
+
+                marker = L.circleMarker(
+                    [lat, lng],
+                    {
+                        radius: 9,
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.85,
+                        weight: 2
+                    }
+                );
+
+            } else {
+
+                marker = L.marker([lat, lng]);
+            }
+
+            const complaintVillage = isAdmin
+                ? (
+                    villages.find(
+                        item =>
+                            Number(item.id) ===
+                            Number(complaint.village_id)
+                    )?.name ||
+                    complaint.village_name ||
+                    "Unknown Village"
+                )
+                : "";
+
+            marker.bindPopup(`
+                <div style="min-width:220px;">
+
+                    <b>
+                        ${escapeHtml(
+                            complaint.complaint_number || "Complaint"
+                        )}
+                    </b>
+
+                    <br><br>
+
+                    Category:
+                    ${escapeHtml(
+                        complaint.category || "-"
+                    )}
+
+                    <br>
+
+                    Status:
+                    <b>
+                        ${escapeHtml(
+                            complaint.status || "Pending"
+                        )}
+                    </b>
+
+                    <br>
+
+                    Priority:
+                    ${escapeHtml(
+                        complaint.priority || "-"
+                    )}
+
+                    <br>
+
+                    ${
+                        isAdmin
+                            ? `
+                                Village:
+                                <b>
+                                    ${escapeHtml(complaintVillage)}
+                                </b>
+                                <br>
+                            `
+                            : ""
+                    }
+
+                    Office:
+                    ${escapeHtml(
+                        complaint.office_name || "-"
+                    )}
+
+                </div>
+            `);
+
+            marker.addTo(markersLayer);
+        });
+
+        if (bounds.length > 0) {
+
+            map.fitBounds(
+                bounds,
+                {
+                    padding: [30, 30],
+                    maxZoom: 16
+                }
+            );
+
+        } else if (isAdmin) {
+
+            const villageBounds = villages
+                .filter(hasCoordinates)
+                .map(item => [
+                    Number(item.latitude),
+                    Number(item.longitude)
+                ]);
+
+            if (villageBounds.length > 0) {
+
+                map.fitBounds(
+                    villageBounds,
+                    {
+                        padding: [30, 30],
+                        maxZoom: 12
+                    }
+                );
+            }
+
+        } else if (village && hasCoordinates(village)) {
+
+            map.setView(
+                [
+                    Number(village.latitude),
+                    Number(village.longitude)
+                ],
+                14
+            );
+        }
+
+        if (filtered.length === 0) {
+
+            showMessage(
+                "No complaints match the selected filters or have valid map coordinates.",
+                "info"
+            );
+
+        } else {
+
+            hideMessage();
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Filters
+    |--------------------------------------------------------------------------
+    */
+
+    document
+        .getElementById("statusFilter")
+        .addEventListener("change", renderComplaints);
+
+    document
+        .getElementById("categoryFilter")
+        .addEventListener("change", renderComplaints);
+
+    document
+        .getElementById("villageFilter")
+        .addEventListener("change", renderComplaints);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Show current location
+    |--------------------------------------------------------------------------
+    */
+
+    function showMyLocation() {
+
+        if (!map) return;
+
+        if (!navigator.geolocation) {
+
+            showMessage(
+                "Geolocation is not supported by your browser.",
+                "error"
+            );
+
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+
+            function(position) {
+
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                L.marker([lat, lng])
+                    .addTo(map)
+                    .bindPopup("<b>Your Current Location</b>")
+                    .openPopup();
+
+                map.setView([lat, lng], 16);
+            },
+
+            function() {
+
+                showMessage(
+                    "Unable to access your current location.",
+                    "error"
+                );
+            }
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Messages
+    |--------------------------------------------------------------------------
+    */
+
+    function showMessage(text, type) {
+
+        const message =
+            document.getElementById("message");
+
+        message.textContent = text;
+
+        message.className = "message " + type;
+
+        message.style.display = "block";
+    }
+
+    function hideMessage() {
+
+        const message =
+            document.getElementById("message");
+
+        message.style.display = "none";
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Escape HTML
+    |--------------------------------------------------------------------------
+    */
+
+    function escapeHtml(value) {
+
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Start
+    |--------------------------------------------------------------------------
+    */
+
+    loadMapData();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,799 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Village Connect - User Management</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6ed;
+            color: #26352a;
+        }
+
+        /* NAVIGATION */
+        header {
+            background: #1e5631;
+            color: white;
+            padding: 16px 5%;
+        }
+
+        .nav-inner {
+            max-width: 1250px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            color: white;
+            text-decoration: none;
+            font-size: 21px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 17px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 7px 0;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            border-bottom: 2px solid white;
+        }
+
+        .nav-logout {
+            border: 0;
+            border-radius: 7px;
+            background: #dc2626;
+            color: white;
+            padding: 9px 14px;
+            cursor: pointer;
+        }
+
+        .nav-logout:hover { background: #b91c1c; }
+
+        /* MAIN */
+        .admin-layout {
+            max-width: 1250px;
+            margin: 32px auto;
+            padding: 0 22px;
+        }
+
+        .admin-header {
+            margin-bottom: 25px;
+        }
+
+        .admin-header h1 {
+            margin: 0 0 7px;
+            color: #1e5631;
+            font-size: 28px;
+        }
+
+        .admin-header p {
+            margin: 0;
+            color: #68736b;
+        }
+
+        /* STATISTICS */
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 17px;
+            margin-bottom: 25px;
+        }
+
+        .admin-stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 22px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(30, 60, 35, .07);
+        }
+
+        .stat-label {
+            color: #68736b;
+            font-weight: bold;
+            margin-bottom: 9px;
+        }
+
+        .stat-value {
+            color: #1e5631;
+            font-size: 31px;
+            font-weight: bold;
+        }
+
+        /* SEARCH */
+        .admin-card {
+            background: white;
+            padding: 23px;
+            border-radius: 17px;
+            box-shadow: 0 5px 20px rgba(30, 60, 35, .07);
+            margin-bottom: 25px;
+        }
+
+        .admin-card h2 {
+            margin: 0 0 17px;
+            color: #1e5631;
+            font-size: 21px;
+        }
+
+        .admin-filters {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 14px;
+        }
+
+        .admin-filters input,
+        .admin-filters select {
+            width: 100%;
+            min-width: 0;
+            padding: 13px 14px;
+            border: 1px solid #d6ded5;
+            border-radius: 9px;
+            background: white;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .admin-filters input:focus,
+        .admin-filters select:focus {
+            border-color: #1e5631;
+            box-shadow: 0 0 0 3px rgba(30, 86, 49, .1);
+        }
+
+        /* USER CARDS */
+        .users-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 17px;
+        }
+
+        .users-heading h2 {
+            margin: 0;
+            color: #1e5631;
+            font-size: 22px;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .user-card {
+            background: white;
+            border-radius: 19px;
+            padding: 23px;
+            box-shadow: 0 6px 22px rgba(30, 60, 35, .07);
+            border: 1px solid #edf0e9;
+            min-width: 0;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .user-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(30, 60, 35, .12);
+        }
+
+        .user-card-top {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            margin-bottom: 18px;
+        }
+
+        .user-avatar {
+            width: 53px;
+            height: 53px;
+            flex: 0 0 53px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #e5f1e6;
+            color: #1e5631;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .user-title {
+            min-width: 0;
+        }
+
+        .user-title h3 {
+            margin: 0 0 5px;
+            color: #1e5631;
+            font-size: 19px;
+            overflow-wrap: anywhere;
+        }
+
+        .user-id {
+            color: #879087;
+            font-size: 12px;
+        }
+
+        .user-details {
+            border-top: 1px solid #edf0eb;
+            padding-top: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 9px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #f0f2ee;
+        }
+
+        .detail-row:last-child { border-bottom: 0; }
+
+        .detail-label {
+            color: #788178;
+            flex: 0 0 auto;
+        }
+
+        .detail-value {
+            color: #303b32;
+            font-weight: 600;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        .user-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 20px;
+            padding: 6px 11px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .role-resident { background: #e0f2fe; color: #075985; }
+        .role-official { background: #ede9fe; color: #6d28d9; }
+        .role-admin { background: #fef3c7; color: #92400e; }
+        .role-volunteer { background: #ffedd5; color: #9a3412; }
+
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-inactive { background: #fee2e2; color: #991b1b; }
+
+        .promote-button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 12px 15px;
+            border: 0;
+            border-radius: 9px;
+            background: #1e5631;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .promote-button:hover { background: #174326; }
+
+        .promote-button:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        .no-action {
+            margin-top: 18px;
+            padding: 11px;
+            text-align: center;
+            color: #788178;
+            background: #f5f7f3;
+            border-radius: 9px;
+            font-size: 13px;
+        }
+
+        /* MESSAGES */
+        .message {
+            display: none;
+            margin: 0 0 20px;
+            padding: 13px 15px;
+            border-radius: 9px;
+            line-height: 1.5;
+        }
+
+        .message.success {
+            display: block;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .message.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .loading,
+        .empty {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 15px;
+            padding: 35px 20px;
+            text-align: center;
+            color: #68736b;
+        }
+
+        footer {
+            text-align: center;
+            color: #778078;
+            padding: 28px;
+            font-size: 13px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1000px) {
+            .users-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .admin-stats { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 750px) {
+            .nav-inner {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .nav-links { gap: 12px; }
+            .admin-filters { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 550px) {
+            .admin-layout { padding: 0 13px; margin-top: 22px; }
+            .users-grid { grid-template-columns: 1fr; }
+            .admin-stats { gap: 10px; }
+            .admin-stat-card { padding: 17px 10px; }
+            .stat-value { font-size: 26px; }
+            .admin-card { padding: 18px; }
+            .user-card { padding: 20px; }
+            .nav-links { gap: 10px 14px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="nav-inner">
+        <a href="dashboard.html" class="logo">Village Connect</a>
+
+        <nav class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="complaints.html">Complaints</a>
+            <a href="villages.html">Villages</a>
+            <a href="events.html">Events</a>
+            <a href="polls.html">Polls</a>
+            <a href="users.html" class="active">Users</a>
+            <a href="analytics.html">Analytics</a>
+            <button type="button" class="nav-logout" onclick="logout()">Logout</button>
+        </nav>
+    </div>
+</header>
+
+<main class="admin-layout">
+
+    <section class="admin-header">
+        <h1>User Management</h1>
+        <p>View registered users and manage their roles in Village Connect.</p>
+    </section>
+
+    <section class="admin-stats">
+        <div class="admin-stat-card">
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value" id="totalUsers">0</div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-label">Residents</div>
+            <div class="stat-value" id="residentUsers">0</div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-label">Officials</div>
+            <div class="stat-value" id="officialUsers">0</div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-label">Admins</div>
+            <div class="stat-value" id="adminUsers">0</div>
+        </div>
+    </section>
+
+    <section class="admin-card">
+        <h2>Search Users</h2>
+
+        <div class="admin-filters">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by name, mobile, email, village or occupation..."
+            >
+
+            <select id="roleFilter">
+                <option value="">All Roles</option>
+                <option value="resident">Resident</option>
+                <option value="official">Official</option>
+                <option value="volunteer">Volunteer</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+    </section>
+
+    <div id="userMessage" class="message"></div>
+
+    <section>
+        <div class="users-heading">
+            <h2>Registered Users</h2>
+        </div>
+
+        <div id="usersGrid" class="users-grid">
+            <div class="loading">Loading users...</div>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <strong>Village Connect</strong>
+    <p>Community management platform.</p>
+    <div>© 2026 Village Connect</div>
+</footer>
+
+<script>
+    const API_URL = "/api";
+    const token = localStorage.getItem("token");
+
+    let currentUser = null;
+    let users = [];
+
+    try {
+        currentUser = JSON.parse(localStorage.getItem("user") || "null");
+    } catch (error) {
+        currentUser = null;
+    }
+
+    /* AUTH CHECK */
+    if (!token || !currentUser) {
+        window.location.href = "login.html";
+    } else if (!["admin", "official"].includes(currentUser.role)) {
+        window.location.href = "../home.html";
+    }
+
+    /* API HELPER */
+    async function fetchAPI(url, options = {}) {
+        const response = await fetch(`${API_URL}${url}`, {
+            ...options,
+            headers: {
+                ...(options.headers || {}),
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        let result = {};
+
+        try {
+            result = await response.json();
+        } catch (error) {
+            result = {};
+        }
+
+        if (!response.ok) {
+            throw new Error(result.message || "Request failed");
+        }
+
+        return result;
+    }
+
+    /* ESCAPE HTML */
+    function escapeHTML(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    /* MESSAGE */
+    function showMessage(message, type = "success") {
+        const element = document.getElementById("userMessage");
+        element.className = `message ${type}`;
+        element.textContent = message;
+    }
+
+    function clearMessage() {
+        const element = document.getElementById("userMessage");
+        element.className = "message";
+        element.textContent = "";
+    }
+
+    /* LOAD USERS */
+    async function loadUsers() {
+        const grid = document.getElementById("usersGrid");
+        grid.innerHTML = '<div class="loading">Loading users...</div>';
+
+        try {
+            const result = await fetchAPI("/users");
+            users = Array.isArray(result.users) ? result.users : [];
+            renderUsers();
+        } catch (error) {
+            console.error("Users error:", error);
+            users = [];
+            updateStatistics();
+
+            grid.innerHTML = `
+                <div class="empty">
+                    Unable to load users: ${escapeHTML(error.message)}
+                </div>
+            `;
+
+            showMessage(error.message || "Unable to load registered users.", "error");
+        }
+    }
+
+    /* OFFICIAL OCCUPATION CHECK */
+    function isOfficialOccupation(occupation) {
+        const allowedOccupations = ["sarpanch", "mpp", "zph", "vro"];
+
+        return allowedOccupations.includes(
+            String(occupation || "").trim().toLowerCase()
+        );
+    }
+
+    /* STATISTICS */
+    function updateStatistics() {
+        document.getElementById("totalUsers").textContent = users.length;
+
+        document.getElementById("residentUsers").textContent =
+            users.filter(user =>
+                String(user.role || "resident").toLowerCase() === "resident"
+            ).length;
+
+        document.getElementById("officialUsers").textContent =
+            users.filter(user =>
+                String(user.role || "").toLowerCase() === "official"
+            ).length;
+
+        document.getElementById("adminUsers").textContent =
+            users.filter(user =>
+                String(user.role || "").toLowerCase() === "admin"
+            ).length;
+    }
+
+    /* RENDER USER CARDS */
+    function renderUsers() {
+        const search = document.getElementById("searchInput")
+            .value.toLowerCase().trim();
+
+        const role = document.getElementById("roleFilter")
+            .value.toLowerCase();
+
+        const filtered = users.filter(user => {
+            const searchableText = [
+                user.name,
+                user.mobile,
+                user.email,
+                user.occupation,
+                user.village_name,
+                user.role,
+                user.status
+            ].join(" ").toLowerCase();
+
+            const matchesSearch = !search || searchableText.includes(search);
+
+            const matchesRole =
+                !role || String(user.role || "resident").toLowerCase() === role;
+
+            return matchesSearch && matchesRole;
+        });
+
+        updateStatistics();
+
+        const grid = document.getElementById("usersGrid");
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `
+                <div class="empty">
+                    No users found. Try changing your search or role filter.
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = filtered.map(user => {
+            const userRole = String(user.role || "resident").toLowerCase();
+            const userStatus = String(user.status || "active").toLowerCase();
+
+            const roleClass = [
+                "resident", "official", "admin", "volunteer"
+            ].includes(userRole) ? `role-${userRole}` : "role-resident";
+
+            const statusClass =
+                userStatus === "active" ? "status-active" : "status-inactive";
+
+            const canPromote =
+                currentUser.role === "admin" &&
+                userRole === "resident" &&
+                isOfficialOccupation(user.occupation);
+
+            const initial = escapeHTML(
+                String(user.name || "U").trim().charAt(0).toUpperCase()
+            );
+
+            const actionHTML = canPromote
+                ? `
+                    <button
+                        type="button"
+                        class="promote-button"
+                        onclick="promoteUser(${Number(user.id)})"
+                    >
+                        Promote to Official
+                    </button>
+                `
+                : `
+                    <div class="no-action">
+                        ${userRole === "official"
+                            ? "Official account"
+                            : "No available action"}
+                    </div>
+                `;
+
+            return `
+                <article class="user-card">
+                    <div class="user-card-top">
+                        <div class="user-avatar">${initial}</div>
+
+                        <div class="user-title">
+                            <h3>${escapeHTML(user.name || "Unnamed User")}</h3>
+                            <div class="user-id">User ID: ${escapeHTML(user.id)}</div>
+                        </div>
+                    </div>
+
+                    <div class="user-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Village</span>
+                            <span class="detail-value">
+                                ${escapeHTML(user.village_name || user.village || "-")}
+                            </span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">Occupation</span>
+                            <span class="detail-value">
+                                ${escapeHTML(user.occupation || "-")}
+                            </span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">Mobile</span>
+                            <span class="detail-value">
+                                ${escapeHTML(user.mobile || "-")}
+                            </span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">Email</span>
+                            <span class="detail-value">
+                                ${escapeHTML(user.email || "-")}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="user-badges">
+                        <span class="badge ${roleClass}">
+                            ${escapeHTML(userRole)}
+                        </span>
+
+                        <span class="badge ${statusClass}">
+                            ${escapeHTML(userStatus)}
+                        </span>
+                    </div>
+
+                    ${actionHTML}
+                </article>
+            `;
+        }).join("");
+    }
+
+    /* PROMOTE USER TO OFFICIAL */
+    async function promoteUser(userId) {
+        if (currentUser.role !== "admin") {
+            showMessage("Only administrators can promote users.", "error");
+            return;
+        }
+
+        const selectedUser = users.find(
+            user => Number(user.id) === Number(userId)
+        );
+
+        if (!selectedUser) {
+            showMessage("User not found.", "error");
+            return;
+        }
+
+        if (
+            String(selectedUser.role || "resident").toLowerCase() !== "resident" ||
+            !isOfficialOccupation(selectedUser.occupation)
+        ) {
+            showMessage("This user is not eligible for promotion.", "error");
+            return;
+        }
+
+        const confirmed = confirm(
+            `Are you sure you want to promote ${selectedUser.name} to Official?`
+        );
+
+        if (!confirmed) return;
+
+        try {
+            const result = await fetchAPI(
+                `/users/${encodeURIComponent(userId)}/promote-official`,
+                { method: "PUT" }
+            );
+
+            showMessage(
+                result.message || "User promoted successfully.",
+                "success"
+            );
+
+            await loadUsers();
+
+        } catch (error) {
+            console.error("Promotion error:", error);
+            showMessage(error.message || "Unable to promote user.", "error");
+        }
+    }
+
+    /* SEARCH AND FILTER */
+    document.getElementById("searchInput")
+        .addEventListener("input", renderUsers);
+
+    document.getElementById("roleFilter")
+        .addEventListener("change", renderUsers);
+
+    /* LOGOUT */
+    function logout() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "login.html";
+    }
+
+    /* START */
+    if (token && currentUser) {
+        loadUsers();
+    }
+</script>
+
+</body>
+</html>

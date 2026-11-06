@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Event Participants | Village Connect</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family: Arial, sans-serif;
+
+            background: #f5f7fa;
+
+            color: #222;
+        }
+
+        header {
+            background: #166534;
+
+            color: white;
+
+            padding: 18px 30px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            flex-wrap: wrap;
+
+            gap: 15px;
+        }
+
+        header h1 {
+            margin: 0;
+
+            font-size: 24px;
+        }
+
+        nav {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+        }
+
+        nav a,
+        nav button {
+            color: white;
+
+            text-decoration: none;
+
+            background: rgba(255,255,255,0.15);
+
+            border: none;
+
+            padding: 9px 14px;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            font-size: 14px;
+        }
+
+        nav a:hover,
+        nav button:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .container {
+            width: 92%;
+
+            max-width: 1100px;
+
+            margin: 30px auto;
+        }
+
+        .back-link {
+            display: inline-block;
+
+            color: #166534;
+
+            text-decoration: none;
+
+            font-weight: bold;
+
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .event-card {
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.08);
+
+            margin-bottom: 25px;
+        }
+
+        .event-card h2 {
+            margin-top: 0;
+
+            color: #166534;
+        }
+
+        .event-info {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(180px, 1fr));
+
+            gap: 15px;
+        }
+
+        .info-box {
+            background: #f8faf9;
+
+            border-radius: 7px;
+
+            padding: 14px;
+        }
+
+        .info-box .label {
+            color: #666;
+
+            font-size: 13px;
+
+            margin-bottom: 5px;
+        }
+
+        .info-box .value {
+            font-weight: bold;
+
+            font-size: 15px;
+        }
+
+        .participants-card {
+            background: white;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.08);
+
+            overflow: hidden;
+        }
+
+        .participants-header {
+            padding: 20px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+
+            border-bottom: 1px solid #eee;
+        }
+
+        .participants-header h3 {
+            margin: 0;
+
+            color: #166534;
+        }
+
+        .count {
+            background: #e8f5e9;
+
+            color: #166534;
+
+            padding: 7px 13px;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+
+            font-size: 14px;
+        }
+
+        .search {
+            padding: 10px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 6px;
+
+            width: 260px;
+
+            max-width: 100%;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 700px;
+        }
+
+        th,
+        td {
+            padding: 13px;
+
+            text-align: left;
+
+            border-bottom: 1px solid #eee;
+
+            font-size: 14px;
+        }
+
+        th {
+            background: #f8faf9;
+
+            color: #166534;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .loading,
+        .empty,
+        .error {
+            padding: 40px;
+
+            text-align: center;
+        }
+
+        .loading,
+        .empty {
+            color: #666;
+        }
+
+        .error {
+            color: #dc2626;
+        }
+
+        @media (max-width: 600px) {
+
+            header {
+                padding: 15px;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>
+        Village Connect Admin
+    </h1>
+
+
+    <nav>
+
+        <a href="dashboard.html">
+            Dashboard
+        </a>
+
+        <a href="complaints.html">
+            Complaints
+        </a>
+
+        <a href="villages.html">
+            Villages
+        </a>
+
+        <a href="events.html">
+            Events
+        </a>
+
+        <button onclick="logout()">
+            Logout
+        </button>
+
+    </nav>
+
+</header>
+
+
+<div class="container">
+
+
+    <a
+        href="events.html"
+        class="back-link"
+    >
+        ← Back to Events
+    </a>
+
+
+    <div
+        id="loading"
+        class="loading"
+    >
+        Loading event...
+    </div>
+
+
+    <div
+        id="error"
+        class="error"
+        style="display:none"
+    ></div>
+
+
+    <!-- EVENT INFORMATION -->
+
+    <div
+        id="eventCard"
+        class="event-card"
+        style="display:none"
+    >
+
+        <h2 id="eventTitle"></h2>
+
+
+        <div class="event-info">
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Date
+                </div>
+
+                <div
+                    id="eventDate"
+                    class="value"
+                ></div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Time
+                </div>
+
+                <div
+                    id="eventTime"
+                    class="value"
+                ></div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Venue
+                </div>
+
+                <div
+                    id="eventVenue"
+                    class="value"
+                ></div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Village
+                </div>
+
+                <div
+                    id="eventVillage"
+                    class="value"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- PARTICIPANTS -->
+
+    <div
+        id="participantsCard"
+        class="participants-card"
+        style="display:none"
+    >
+
+        <div class="participants-header">
+
+            <h3>
+                Registered Participants
+            </h3>
+
+
+            <span
+                id="participantCount"
+                class="count"
+            >
+                0 Participants
+            </span>
+
+
+            <input
+                type="text"
+                id="searchInput"
+                class="search"
+                placeholder="Search participants..."
+                oninput="filterParticipants()"
+            >
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            #
+                        </th>
+
+                        <th>
+                            Name
+                        </th>
+
+                        <th>
+                            Mobile
+                        </th>
+
+                        <th>
+                            Email
+                        </th>
+
+                        <th>
+                            Registered At
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody
+                    id="participantsTable"
+                >
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+const token =
+    localStorage.getItem("token");
+
+
+if (!token) {
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+// ============================================================
+// EVENT ID
+// ============================================================
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const eventId =
+    params.get("id");
+
+
+let allParticipants = [];
+
+
+// ============================================================
+// LOGOUT
+// ============================================================
+
+function logout() {
+
+    localStorage.removeItem("token");
+
+    localStorage.removeItem("user");
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+// ============================================================
+// LOAD EVENT
+// ============================================================
+
+async function loadEvent() {
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/events/${eventId}`,
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to fetch event"
+            );
+
+        }
+
+
+        const event =
+            data.event;
+
+
+        document.getElementById(
+            "eventTitle"
+        ).textContent =
+            event.title;
+
+
+        document.getElementById(
+            "eventDate"
+        ).textContent =
+            formatDate(event.date);
+
+
+        document.getElementById(
+            "eventTime"
+        ).textContent =
+            event.time
+                ? formatTime(event.time)
+                : "-";
+
+
+        document.getElementById(
+            "eventVenue"
+        ).textContent =
+            event.venue || "-";
+
+
+        document.getElementById(
+            "eventVillage"
+        ).textContent =
+            event.village_name || "-";
+
+
+        document.getElementById(
+            "eventCard"
+        ).style.display =
+            "block";
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// LOAD PARTICIPANTS
+// ============================================================
+
+async function loadParticipants() {
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/events/${eventId}/participants`,
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to fetch participants"
+            );
+
+        }
+
+
+        allParticipants =
+            data.participants || [];
+
+
+        displayParticipants(
+            allParticipants
+        );
+
+
+        document.getElementById(
+            "participantsCard"
+        ).style.display =
+            "block";
+
+
+        document.getElementById(
+            "participantCount"
+        ).textContent =
+            `${allParticipants.length} Participant${
+                allParticipants.length === 1
+                    ? ""
+                    : "s"
+            }`;
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// DISPLAY PARTICIPANTS
+// ============================================================
+
+function displayParticipants(
+    participants
+) {
+
+    const table =
+        document.getElementById(
+            "participantsTable"
+        );
+
+
+    if (participants.length === 0) {
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="5"
+                    class="empty"
+                >
+                    No residents have registered
+                    for this event yet.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    table.innerHTML =
+        participants.map(
+            (participant, index) => {
+
+                return `
+
+                    <tr>
+
+                        <td>
+                            ${index + 1}
+                        </td>
+
+                        <td>
+                            <strong>
+                                ${escapeHtml(
+                                    participant.name ||
+                                    "-"
+                                )}
+                            </strong>
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                participant.mobile ||
+                                "-"
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                participant.email ||
+                                "-"
+                            )}
+                        </td>
+
+                        <td>
+                            ${formatDateTime(
+                                participant.registered_at
+                            )}
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+// ============================================================
+// SEARCH
+// ============================================================
+
+function filterParticipants() {
+
+    const search =
+        document.getElementById(
+            "searchInput"
+        ).value
+        .toLowerCase()
+        .trim();
+
+
+    if (!search) {
+
+        displayParticipants(
+            allParticipants
+        );
+
+        return;
+
+    }
+
+
+    const filtered =
+        allParticipants.filter(
+            participant => {
+
+                return (
+
+                    (participant.name || "")
+                        .toLowerCase()
+                        .includes(search)
+
+                    ||
+
+                    (participant.mobile || "")
+                        .toLowerCase()
+                        .includes(search)
+
+                    ||
+
+                    (participant.email || "")
+                        .toLowerCase()
+                        .includes(search)
+
+                );
+
+            }
+        );
+
+
+    displayParticipants(
+        filtered
+    );
+
+}
+
+
+// ============================================================
+// ERROR
+// ============================================================
+
+function showError(message) {
+
+    document.getElementById(
+        "loading"
+    ).style.display =
+        "none";
+
+
+    const error =
+        document.getElementById(
+            "error"
+        );
+
+
+    error.style.display =
+        "block";
+
+
+    error.textContent =
+        message;
+
+}
+
+
+// ============================================================
+// DATE
+// ============================================================
+
+function formatDate(dateString) {
+
+    if (!dateString) {
+
+        return "-";
+
+    }
+
+
+    const date =
+        new Date(dateString);
+
+
+    if (isNaN(date.getTime())) {
+
+        return dateString;
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+// ============================================================
+// TIME
+// ============================================================
+
+function formatTime(timeString) {
+
+    const parts =
+        String(timeString)
+            .split(":");
+
+
+    if (parts.length < 2) {
+
+        return timeString;
+
+    }
+
+
+    let hours =
+        parseInt(parts[0]);
+
+
+    const minutes =
+        parts[1];
+
+
+    const ampm =
+        hours >= 12
+            ? "PM"
+            : "AM";
+
+
+    hours =
+        hours % 12 || 12;
+
+
+    return `${hours}:${minutes} ${ampm}`;
+
+}
+
+
+// ============================================================
+// DATE + TIME
+// ============================================================
+
+function formatDateTime(
+    value
+) {
+
+    if (!value) {
+
+        return "-";
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (isNaN(date.getTime())) {
+
+        return value;
+
+    }
+
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+// ============================================================
+// ESCAPE HTML
+// ============================================================
+
+function escapeHtml(value) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        value ?? "";
+
+
+    return div.innerHTML;
+
+}
+
+
+// ============================================================
+// START
+// ============================================================
+
+if (!eventId) {
+
+    showError(
+        "Event ID is missing."
+    );
+
+} else {
+
+    loadEvent();
+
+    loadParticipants();
+
+}
+
+</script>
+
+
+</body>
+
+</html>

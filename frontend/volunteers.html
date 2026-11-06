@@ -1,0 +1,700 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteers - Village Connect</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+        }
+
+        nav {
+            background: #176b4d;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        nav h2 {
+            margin: 0;
+        }
+
+        nav .links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        nav a, nav button {
+            color: white;
+            text-decoration: none;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        nav a:hover, nav button:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .header, .register-box, .volunteers-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .header h1 {
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .message {
+            display: none;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #dff5e8;
+            color: #176b4d;
+        }
+
+        .error {
+            background: #ffe1e1;
+            color: #b00020;
+        }
+
+        .register-box h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input, textarea {
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .btn {
+            margin-top: 15px;
+            padding: 11px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            background: #176b4d;
+            color: white;
+        }
+
+        .btn:hover {
+            background: #11523b;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .approve-btn {
+            background: #176b4d;
+        }
+
+        .reject-btn {
+            background: #b00020;
+        }
+
+        .delete-btn {
+            background: #555;
+        }
+
+        .status-box {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search {
+            padding: 10px;
+            width: 280px;
+        }
+
+        .volunteer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .volunteer-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 18px;
+            background: #fff;
+        }
+
+        .volunteer-card h3 {
+            margin-bottom: 10px;
+        }
+
+        .info {
+            margin: 8px 0;
+            color: #555;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .approved {
+            background: #dff5e8;
+            color: #176b4d;
+        }
+
+        .pending {
+            background: #fff0c2;
+            color: #805f00;
+        }
+
+        .rejected {
+            background: #ffe1e1;
+            color: #b00020;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+            grid-column: 1 / -1;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .actions .btn {
+            margin-top: 0;
+        }
+
+        @media (max-width: 800px) {
+            .volunteer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .form-grid, .volunteer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .search {
+                width: 100%;
+            }
+
+            nav {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav>
+    <h2>Village Connect</h2>
+
+    <div class="links">
+        <a href="home.html">Home</a>
+        <a href="complaints.html">Complaints</a>
+        <a href="villages.html">Villages</a>
+        <a href="events.html">Events</a>
+        <a href="polls.html">Polls</a>
+        <a href="volunteershtml">Volunteers</a>
+        <button onclick="logout()">Logout</button>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="header">
+        <h1 id="pageTitle">Community Volunteers</h1>
+        <p id="pageDescription">
+            Join the Village Connect volunteer community and contribute
+            to village development activities.
+        </p>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div class="register-box" id="registerBox">
+        <h2>Become a Volunteer</h2>
+
+        <form id="volunteerForm">
+            <div class="form-grid">
+
+                <div class="form-group full">
+                    <label for="skills">Skills</label>
+                    <textarea
+                        id="skills"
+                        placeholder="Example: Teaching, event management, computer skills"
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-group full">
+                    <label for="availability">Availability</label>
+                    <input
+                        type="text"
+                        id="availability"
+                        placeholder="Example: Weekends"
+                    >
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn" id="registerButton">
+                Register as Volunteer
+            </button>
+        </form>
+
+        <div id="myStatus" class="status-box" style="display:none"></div>
+    </div>
+
+    <div class="volunteers-section">
+        <div class="section-header">
+            <h2 id="listTitle">Our Volunteers</h2>
+
+            <input
+                type="text"
+                id="search"
+                class="search"
+                placeholder="Search volunteers..."
+            >
+        </div>
+
+        <div id="volunteerGrid" class="volunteer-grid"></div>
+    </div>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+
+if (!token) {
+    window.location.href = "login.html";
+}
+
+const user = JSON.parse(localStorage.getItem("user") || "null");
+
+if (!user) {
+    alert("Please log in again.");
+    window.location.href = "login.html";
+}
+
+const role = user?.role || "resident";
+const isAdmin = role === "admin";
+const isOfficial = role === "official";
+const isManager = isAdmin || isOfficial;
+
+const message = document.getElementById("message");
+const volunteerGrid = document.getElementById("volunteerGrid");
+const volunteerForm = document.getElementById("volunteerForm");
+const registerBox = document.getElementById("registerBox");
+const searchInput = document.getElementById("search");
+const myStatus = document.getElementById("myStatus");
+
+let volunteers = [];
+
+function showMessage(text, type) {
+    message.textContent = text;
+    message.className = `message ${type}`;
+    message.style.display = "block";
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+async function apiRequest(url, options = {}) {
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            ...(options.headers || {}),
+            Authorization: `Bearer ${token}`,
+            ...(options.body ? { "Content-Type": "application/json" } : {})
+        }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+        throw new Error(data.message || "Request failed.");
+    }
+
+    return data;
+}
+
+function configurePage() {
+    if (isManager) {
+        document.getElementById("pageTitle").textContent =
+            "Volunteer Management";
+
+        document.getElementById("pageDescription").textContent =
+            isAdmin
+                ? "Manage volunteer applications across all villages."
+                : "Review and manage volunteer applications from your village.";
+
+        document.getElementById("listTitle").textContent =
+            "Volunteer Applications";
+
+        registerBox.style.display = "none";
+
+        searchInput.placeholder = "Search applications...";
+    } else {
+        document.getElementById("pageTitle").textContent =
+            "Community Volunteers";
+
+        document.getElementById("pageDescription").textContent =
+            "Join the Village Connect volunteer community and contribute to village development activities.";
+
+        document.getElementById("listTitle").textContent =
+            "My Volunteer Application";
+
+        searchInput.style.display = "none";
+    }
+}
+
+function getStatus(volunteer) {
+    if (volunteer.status) {
+        return String(volunteer.status).toLowerCase();
+    }
+
+    return Number(volunteer.approved) === 1
+        ? "approved"
+        : "pending";
+}
+
+function statusLabel(status) {
+    if (status === "approved") return "Approved";
+    if (status === "rejected") return "Rejected";
+    return "Pending Approval";
+}
+
+function displayVolunteers(list) {
+    if (!list.length) {
+        volunteerGrid.innerHTML = `
+            <div class="empty">
+                ${isManager
+                    ? "No volunteer applications found in your accessible villages."
+                    : "You have not submitted a volunteer application yet."}
+            </div>
+        `;
+        return;
+    }
+
+    volunteerGrid.innerHTML = "";
+
+    list.forEach(volunteer => {
+        const status = getStatus(volunteer);
+        const card = document.createElement("div");
+        card.className = "volunteer-card";
+
+        const actions = isManager ? `
+            <div class="actions">
+                <button
+                    class="btn approve-btn"
+                    onclick="updateStatus(${Number(volunteer.id)}, 'approved')"
+                    ${status === "approved" ? "disabled" : ""}
+                >Approve</button>
+
+                <button
+                    class="btn reject-btn"
+                    onclick="updateStatus(${Number(volunteer.id)}, 'rejected')"
+                    ${status === "rejected" ? "disabled" : ""}
+                >Reject</button>
+
+                <button
+                    class="btn delete-btn"
+                    onclick="deleteApplication(${Number(volunteer.id)})"
+                >Delete</button>
+            </div>
+        ` : "";
+
+        card.innerHTML = `
+            <h3>${escapeHtml(volunteer.user_name || "Volunteer")}</h3>
+
+            ${isManager ? `
+                <div class="info">
+                    <strong>Village:</strong>
+                    ${escapeHtml(volunteer.village_name || "Not specified")}
+                </div>
+                <div class="info">
+                    <strong>Mobile:</strong>
+                    ${escapeHtml(volunteer.mobile || "Not provided")}
+                </div>
+                <div class="info">
+                    <strong>Email:</strong>
+                    ${escapeHtml(volunteer.email || "Not provided")}
+                </div>
+            ` : ""}
+
+            <div class="info">
+                <strong>Skills:</strong>
+                ${escapeHtml(volunteer.skills || "Not specified")}
+            </div>
+
+            <div class="info">
+                <strong>Availability:</strong>
+                ${escapeHtml(volunteer.availability || "Not specified")}
+            </div>
+
+            <span class="badge ${escapeHtml(status)}">
+                ${statusLabel(status)}
+            </span>
+
+            ${actions}
+        `;
+
+        volunteerGrid.appendChild(card);
+    });
+}
+
+async function loadVolunteers() {
+    volunteerGrid.innerHTML = `
+        <div class="empty">Loading...</div>
+    `;
+
+    try {
+        const data = await apiRequest("/api/volunteers");
+
+        volunteers = data.volunteers || [];
+        displayVolunteers(volunteers);
+
+        if (!isManager) {
+            showMyApplicationStatus();
+        }
+    } catch (error) {
+        console.error("Load volunteers error:", error);
+
+        volunteerGrid.innerHTML = `
+            <div class="empty">${escapeHtml(error.message)}</div>
+        `;
+    }
+}
+
+function showMyApplicationStatus() {
+    const mine = volunteers.find(
+        item => Number(item.user_id) === Number(user.id)
+    );
+
+    if (!mine) {
+        myStatus.style.display = "none";
+        volunteerForm.style.display = "block";
+        return;
+    }
+
+    const status = getStatus(mine);
+
+    myStatus.style.display = "block";
+    volunteerForm.style.display = "none";
+
+    myStatus.innerHTML = `
+        <strong>Your application status: ${escapeHtml(statusLabel(status))}</strong>
+        <p style="margin-top:8px">
+            ${status === "pending"
+                ? "Your application is awaiting approval."
+                : status === "approved"
+                    ? "Your volunteer application has been approved."
+                    : "Your application was rejected. Please contact your village Sarpanch for more information."}
+        </p>
+    `;
+}
+
+volunteerForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const skills = document.getElementById("skills").value.trim();
+    const availability =
+        document.getElementById("availability").value.trim();
+
+    if (!skills) {
+        showMessage("Please enter your skills.", "error");
+        return;
+    }
+
+    const button = document.getElementById("registerButton");
+    button.disabled = true;
+
+    try {
+        const data = await apiRequest("/api/volunteers", {
+            method: "POST",
+            body: JSON.stringify({ skills, availability })
+        });
+
+        showMessage(
+            data.message || "Volunteer application submitted successfully.",
+            "success"
+        );
+
+        volunteerForm.reset();
+        await loadVolunteers();
+    } catch (error) {
+        showMessage(error.message, "error");
+    } finally {
+        button.disabled = false;
+    }
+});
+
+async function updateStatus(volunteerId, status) {
+    const action = status === "approved" ? "approve" : "reject";
+
+    if (!confirm(`Are you sure you want to ${action} this application?`)) {
+        return;
+    }
+
+    try {
+        const data = await apiRequest(
+            `/api/volunteers/${volunteerId}/approval`,
+            {
+                method: "PUT",
+                body: JSON.stringify({ status })
+            }
+        );
+
+        showMessage(data.message, "success");
+        await loadVolunteers();
+    } catch (error) {
+        showMessage(error.message, "error");
+    }
+}
+
+async function deleteApplication(volunteerId) {
+    if (!confirm("Are you sure you want to delete this application? This cannot be undone.")) {
+        return;
+    }
+
+    try {
+        const data = await apiRequest(
+            `/api/volunteers/${volunteerId}`,
+            { method: "DELETE" }
+        );
+
+        showMessage(data.message, "success");
+        await loadVolunteers();
+    } catch (error) {
+        showMessage(error.message, "error");
+    }
+}
+
+searchInput.addEventListener("input", function() {
+    const search = this.value.toLowerCase().trim();
+
+    const filtered = volunteers.filter(volunteer => {
+        return (
+            (volunteer.user_name || "").toLowerCase().includes(search) ||
+            (volunteer.skills || "").toLowerCase().includes(search) ||
+            (volunteer.village_name || "").toLowerCase().includes(search) ||
+            (volunteer.availability || "").toLowerCase().includes(search) ||
+            getStatus(volunteer).includes(search)
+        );
+    });
+
+    displayVolunteers(filtered);
+});
+
+configurePage();
+loadVolunteers();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Uploaded files
+backend/uploads/*
+
+# Keep uploads folder
+!backend/uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# OS files
+.DS_Store

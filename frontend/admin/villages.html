@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin - Villages | Village Connect</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        header {
+            background: #166534;
+            color: white;
+            padding: 18px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 22px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-name {
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            border: none;
+            background: white;
+            color: #166534;
+            padding: 9px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1250px;
+            margin: 25px auto;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .page-title h2 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .page-title p {
+            color: #6b7280;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: #374151;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 7px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .form-card h3 {
+            margin-bottom: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 7px;
+            font-size: 14px;
+        }
+
+        input {
+            padding: 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #166534;
+        }
+
+        .form-buttons {
+            margin-top: 18px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .save-btn {
+            background: #166534;
+            color: white;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cancel-btn {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 7px;
+            display: none;
+        }
+
+        .success {
+            display: block;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .search-card {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .villages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .village-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .village-card h3 {
+            color: #166534;
+            margin-bottom: 7px;
+        }
+
+        .location {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .stat {
+            background: #f3f4f6;
+            padding: 10px 5px;
+            text-align: center;
+            border-radius: 7px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 18px;
+        }
+
+        .stat span {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .coordinates {
+            font-size: 12px;
+            color: #6b7280;
+            background: #f9fafb;
+            padding: 9px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .card-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn {
+            flex: 1;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 9px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .view-btn {
+            flex: 1;
+            background: #374151;
+            color: white;
+            border: none;
+            padding: 9px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .loading,
+        .empty {
+            background: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            color: #6b7280;
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 900px) {
+            .villages-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            header {
+                padding: 15px;
+            }
+
+            .header-right {
+                gap: 8px;
+            }
+
+            .admin-name {
+                display: none;
+            }
+
+            .container {
+                width: 92%;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .villages-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-section {
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+
+        <h1>Village Connect</h1>
+
+        <div class="header-right">
+
+            <span
+                class="admin-name"
+                id="adminName">
+                Admin
+            </span>
+
+            <button
+                class="logout-btn"
+                onclick="logout()">
+                Logout
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+        <div class="top-section">
+
+            <div class="page-title">
+
+                <h2>Village Management</h2>
+
+                <p>
+                    Manage villages and community information.
+                </p>
+
+            </div>
+
+            <a
+                href="dashboard.html"
+                class="back-btn">
+                ← Dashboard
+            </a>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- ADD / EDIT VILLAGE -->
+        <!-- ================================================= -->
+
+        <div class="form-card">
+
+            <h3 id="formTitle">
+                Add New Village
+            </h3>
+
+            <form id="villageForm">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="name">
+                            Village Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            required
+                            placeholder="Enter village name">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="district">
+                            District
+                        </label>
+
+                        <input
+                            type="text"
+                            id="district"
+                            required
+                            placeholder="Enter district">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="state">
+                            State
+                        </label>
+
+                        <input
+                            type="text"
+                            id="state"
+                            required
+                            value="Andhra Pradesh">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="latitude">
+                            Latitude
+                        </label>
+
+                        <input
+                            type="number"
+                            id="latitude"
+                            step="any"
+                            placeholder="Example: 16.619885">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="longitude">
+                            Longitude
+                        </label>
+
+                        <input
+                            type="number"
+                            id="longitude"
+                            step="any"
+                            placeholder="Example: 80.542442">
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-buttons">
+
+                    <button
+                        type="submit"
+                        class="save-btn"
+                        id="saveButton">
+                        Add Village
+                    </button>
+
+                    <button
+                        type="button"
+                        class="cancel-btn"
+                        id="cancelButton"
+                        onclick="cancelEdit()"
+                        style="display:none;">
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            <div
+                id="message"
+                class="message">
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- SEARCH -->
+        <!-- ================================================= -->
+
+        <div class="search-card">
+
+            <input
+                type="text"
+                id="searchInput"
+                class="search-input"
+                placeholder="Search village, district or state..."
+                oninput="filterVillages()">
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- VILLAGES -->
+        <!-- ================================================= -->
+
+        <div
+            id="villagesGrid"
+            class="villages-grid">
+
+            <div class="loading">
+                Loading villages...
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <script>
+
+        const API = "/api";
+
+        let villages = [];
+
+        let editingVillageId = null;
+
+
+        // ====================================================
+        // AUTHENTICATION
+        // ====================================================
+
+        const token =
+            localStorage.getItem("token");
+
+        const userString =
+            localStorage.getItem("user");
+
+
+        if (!token) {
+
+            window.location.href =
+                "login.html";
+
+        }
+
+
+        let currentUser = null;
+
+        try {
+
+            currentUser =
+                JSON.parse(userString);
+
+        } catch (error) {
+
+            currentUser = null;
+
+        }
+
+
+        if (
+            currentUser &&
+            currentUser.name
+        ) {
+
+            document.getElementById(
+                "adminName"
+            ).textContent =
+                currentUser.name;
+
+        }
+
+
+        // ====================================================
+        // LOGOUT
+        // ====================================================
+
+        function logout() {
+
+            localStorage.removeItem("token");
+
+            localStorage.removeItem("user");
+
+            window.location.href =
+                "login.html";
+
+        }
+
+
+        // ====================================================
+        // LOAD VILLAGES
+        // ====================================================
+
+        async function loadVillages() {
+
+            const grid =
+                document.getElementById(
+                    "villagesGrid"
+                );
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API}/villages`,
+                        {
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
+                            }
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to fetch villages"
+                    );
+
+                }
+
+
+                villages =
+                    data.villages || [];
+
+
+                displayVillages(
+                    villages
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Village loading error:",
+                    error
+                );
+
+                grid.innerHTML = `
+                    <div class="empty">
+                        Unable to fetch villages.<br><br>
+                        ${error.message}
+                    </div>
+                `;
+
+            }
+
+        }
+
+
+        // ====================================================
+        // DISPLAY VILLAGES
+        // ====================================================
+
+        function displayVillages(
+            villageList
+        ) {
+
+            const grid =
+                document.getElementById(
+                    "villagesGrid"
+                );
+
+
+            if (!villageList.length) {
+
+                grid.innerHTML = `
+                    <div class="empty">
+                        No villages found.
+                    </div>
+                `;
+
+                return;
+
+            }
+
+
+            grid.innerHTML =
+                villageList.map(
+                    village => {
+
+                        return `
+
+                        <div class="village-card">
+
+                            <h3>
+                                ${escapeHtml(
+                                    village.name
+                                )}
+                            </h3>
+
+                            <div class="location">
+                                ${escapeHtml(
+                                    village.district
+                                )},
+                                ${escapeHtml(
+                                    village.state
+                                )}
+                            </div>
+
+
+                            <div class="stats">
+
+                                <div class="stat">
+                                    <strong>
+                                        ${village.total_residents || 0}
+                                    </strong>
+                                    <span>
+                                        Residents
+                                    </span>
+                                </div>
+
+                                <div class="stat">
+                                    <strong>
+                                        ${village.total_complaints || 0}
+                                    </strong>
+                                    <span>
+                                        Complaints
+                                    </span>
+                                </div>
+
+                                <div class="stat">
+                                    <strong>
+                                        ${village.resolved_complaints || 0}
+                                    </strong>
+                                    <span>
+                                        Resolved
+                                    </span>
+                                </div>
+
+                            </div>
+
+
+                            <div class="coordinates">
+
+                                Latitude:
+                                ${village.latitude ?? "Not available"}
+
+                                <br>
+
+                                Longitude:
+                                ${village.longitude ?? "Not available"}
+
+                            </div>
+
+
+                            <div class="card-buttons">
+
+                                <button
+                                    class="edit-btn"
+                                    onclick="editVillage(${village.id})">
+                                    Edit
+                                </button>
+
+                                <button
+                                    class="view-btn"
+                                    onclick="viewVillage(${village.id})">
+                                    View
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        `;
+
+                    }
+                ).join("");
+
+        }
+
+
+        // ====================================================
+        // SEARCH
+        // ====================================================
+
+        function filterVillages() {
+
+            const search =
+                document.getElementById(
+                    "searchInput"
+                ).value
+                .toLowerCase()
+                .trim();
+
+
+            const filtered =
+                villages.filter(
+                    village => {
+
+                        return (
+
+                            String(
+                                village.name || ""
+                            )
+                            .toLowerCase()
+                            .includes(search)
+
+                            ||
+
+                            String(
+                                village.district || ""
+                            )
+                            .toLowerCase()
+                            .includes(search)
+
+                            ||
+
+                            String(
+                                village.state || ""
+                            )
+                            .toLowerCase()
+                            .includes(search)
+
+                        );
+
+                    }
+                );
+
+
+            displayVillages(
+                filtered
+            );
+
+        }
+
+
+        // ====================================================
+        // ADD / UPDATE VILLAGE
+        // ====================================================
+
+        document
+            .getElementById("villageForm")
+            .addEventListener(
+                "submit",
+                async function (event) {
+
+                    event.preventDefault();
+
+
+                    const villageData = {
+
+                        name:
+                            document.getElementById(
+                                "name"
+                            ).value.trim(),
+
+                        district:
+                            document.getElementById(
+                                "district"
+                            ).value.trim(),
+
+                        state:
+                            document.getElementById(
+                                "state"
+                            ).value.trim(),
+
+                        latitude:
+                            document.getElementById(
+                                "latitude"
+                            ).value || null,
+
+                        longitude:
+                            document.getElementById(
+                                "longitude"
+                            ).value || null
+
+                    };
+
+
+                    try {
+
+                        let response;
+
+
+                        if (editingVillageId) {
+
+                            response =
+                                await fetch(
+                                    `${API}/villages/${editingVillageId}`,
+                                    {
+                                        method: "PUT",
+
+                                        headers: {
+                                            "Content-Type":
+                                                "application/json",
+
+                                            Authorization:
+                                                `Bearer ${token}`
+                                        },
+
+                                        body:
+                                            JSON.stringify(
+                                                villageData
+                                            )
+                                    }
+                                );
+
+                        } else {
+
+                            response =
+                                await fetch(
+                                    `${API}/villages`,
+                                    {
+                                        method: "POST",
+
+                                        headers: {
+                                            "Content-Type":
+                                                "application/json",
+
+                                            Authorization:
+                                                `Bearer ${token}`
+                                        },
+
+                                        body:
+                                            JSON.stringify(
+                                                villageData
+                                            )
+                                    }
+                                );
+
+                        }
+
+
+                        const data =
+                            await response.json();
+
+
+                        if (!response.ok) {
+
+                            throw new Error(
+                                data.message ||
+                                "Unable to save village"
+                            );
+
+                        }
+
+
+                        showMessage(
+                            data.message ||
+                            "Village saved successfully",
+                            "success"
+                        );
+
+
+                        resetForm();
+
+                        await loadVillages();
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "Save village error:",
+                            error
+                        );
+
+                        showMessage(
+                            error.message,
+                            "error"
+                        );
+
+                    }
+
+                }
+            );
+
+
+        // ====================================================
+        // EDIT VILLAGE
+        // ====================================================
+
+        function editVillage(id) {
+
+            const village =
+                villages.find(
+                    item =>
+                        Number(item.id) ===
+                        Number(id)
+                );
+
+
+            if (!village) {
+                return;
+            }
+
+
+            editingVillageId =
+                village.id;
+
+
+            document.getElementById(
+                "formTitle"
+            ).textContent =
+                "Edit Village";
+
+
+            document.getElementById(
+                "saveButton"
+            ).textContent =
+                "Update Village";
+
+
+            document.getElementById(
+                "cancelButton"
+            ).style.display =
+                "block";
+
+
+            document.getElementById(
+                "name"
+            ).value =
+                village.name || "";
+
+
+            document.getElementById(
+                "district"
+            ).value =
+                village.district || "";
+
+
+            document.getElementById(
+                "state"
+            ).value =
+                village.state || "";
+
+
+            document.getElementById(
+                "latitude"
+            ).value =
+                village.latitude ?? "";
+
+
+            document.getElementById(
+                "longitude"
+            ).value =
+                village.longitude ?? "";
+
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        }
+
+
+        // ====================================================
+        // CANCEL EDIT
+        // ====================================================
+
+        function cancelEdit() {
+
+            resetForm();
+
+        }
+
+
+        // ====================================================
+        // RESET FORM
+        // ====================================================
+
+        function resetForm() {
+
+            editingVillageId =
+                null;
+
+
+            document.getElementById(
+                "villageForm"
+            ).reset();
+
+
+            document.getElementById(
+                "state"
+            ).value =
+                "Andhra Pradesh";
+
+
+            document.getElementById(
+                "formTitle"
+            ).textContent =
+                "Add New Village";
+
+
+            document.getElementById(
+                "saveButton"
+            ).textContent =
+                "Add Village";
+
+
+            document.getElementById(
+                "cancelButton"
+            ).style.display =
+                "none";
+
+        }
+
+
+        // ====================================================
+        // VIEW VILLAGE
+        // ====================================================
+
+        function viewVillage(id) {
+
+            window.location.href =
+                `../village-details.html?id=${id}`;
+
+        }
+
+
+        // ====================================================
+        // MESSAGE
+        // ====================================================
+
+        function showMessage(
+            message,
+            type
+        ) {
+
+            const element =
+                document.getElementById(
+                    "message"
+                );
+
+
+            element.textContent =
+                message;
+
+
+            element.className =
+                `message ${type}`;
+
+
+            setTimeout(
+                () => {
+
+                    element.className =
+                        "message";
+
+                },
+                4000
+            );
+
+        }
+
+
+        // ====================================================
+        // HTML ESCAPE
+        // ====================================================
+
+        function escapeHtml(value) {
+
+            return String(value ?? "")
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+        }
+
+
+        // ====================================================
+        // INITIAL LOAD
+        // ====================================================
+
+        loadVillages();
+
+    </script>
+
+</body>
+
+</html>

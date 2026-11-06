@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Report a Problem - Village Connect</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 30px;
+            color: #166534;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid #bbf7d0;
+            border-color: #16a34a;
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        input[type="file"] {
+            background: white;
+            padding: 10px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 14px;
+            border: none;
+            border-radius: 7px;
+            background: #166534;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #14532d;
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        #locationButton {
+            background: #16a34a;
+        }
+
+        #locationButton:hover {
+            background: #15803d;
+        }
+
+        #locationButton:disabled {
+            background: #9ca3af;
+        }
+
+        #locationStatus {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 6px;
+            background: #f0fdf4;
+            color: #166534;
+            font-size: 14px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        #message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            line-height: 1.5;
+            word-break: break-word;
+            display: none;
+        }
+
+        .other-problem-field {
+            display: none;
+            margin-top: 5px;
+            padding: 15px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+        }
+
+        .other-problem-field label {
+            margin-top: 0;
+            color: #166534;
+        }
+
+        .other-problem-field small {
+            display: block;
+            margin-top: 7px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            color: #166534;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                margin: 15px auto;
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Report a Problem</h1>
+
+        <form id="complaintForm">
+
+            <!-- CATEGORY -->
+
+            <label for="category">Category</label>
+
+            <select id="category" required>
+                <option value="">Select Category</option>
+                <option value="Road">Road</option>
+                <option value="Drainage">Drainage</option>
+                <option value="Garbage">Garbage</option>
+                <option value="Waterlogging">Waterlogging</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <!-- OTHER PROBLEM FIELD -->
+
+            <div class="other-problem-field" id="otherProblemContainer">
+
+                <label for="otherProblem">
+                    Specify Your Problem
+                </label>
+
+                <input
+                    type="text"
+                    id="otherProblem"
+                    placeholder="Enter the type of problem"
+                    maxlength="200"
+                >
+
+                <small>
+                    Please specify the problem that does not belong
+                    to the categories listed above.
+                </small>
+
+            </div>
+
+            <!-- SEVERITY -->
+
+            <label for="severity">Severity</label>
+
+            <select id="severity" required>
+                <option value="">Select Severity</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Severe">Severe</option>
+            </select>
+
+            <!-- AREA -->
+
+            <label for="area">Area</label>
+
+            <input
+                type="text"
+                id="area"
+                placeholder="Enter area"
+            >
+
+            <!-- LANDMARK -->
+
+            <label for="landmark">Landmark</label>
+
+            <input
+                type="text"
+                id="landmark"
+                placeholder="Enter nearby landmark"
+            >
+
+            <!-- DESCRIPTION -->
+
+            <label for="description">Problem Description</label>
+
+            <textarea
+                id="description"
+                placeholder="Describe the problem"
+                required
+            ></textarea>
+
+            <!-- PHOTO -->
+
+            <label for="photo">Problem Photo</label>
+
+            <input
+                type="file"
+                id="photo"
+                accept="image/jpeg,image/png,image/webp"
+            >
+
+            <!-- LOCATION -->
+
+            <button
+                type="button"
+                id="locationButton"
+            >
+                Get My Location
+            </button>
+
+            <div id="locationStatus">
+                Location not captured
+            </div>
+
+            <!-- SUBMIT -->
+
+            <button type="submit" id="submitButton">
+                Submit Complaint
+            </button>
+
+            <div
+                id="message"
+                role="status"
+                aria-live="polite"
+            ></div>
+
+        </form>
+
+        <a href="home.html" class="back-link">
+            ← Back to Home
+        </a>
+
+    </div>
+
+    <script>
+        "use strict";
+
+        /* =========================================
+           GLOBAL VARIABLES
+        ========================================= */
+
+        let latitude = null;
+        let longitude = null;
+
+        const category = document.getElementById("category");
+
+        const otherProblemContainer =
+            document.getElementById("otherProblemContainer");
+
+        const otherProblem =
+            document.getElementById("otherProblem");
+
+        const locationButton =
+            document.getElementById("locationButton");
+
+        const locationStatus =
+            document.getElementById("locationStatus");
+
+        const complaintForm =
+            document.getElementById("complaintForm");
+
+        const submitButton =
+            document.getElementById("submitButton");
+
+        const message =
+            document.getElementById("message");
+
+
+        /* =========================================
+           SHOW / HIDE OTHER PROBLEM FIELD
+        ========================================= */
+
+        category.addEventListener("change", function () {
+
+            if (category.value === "Other") {
+
+                otherProblemContainer.style.display = "block";
+
+                otherProblem.required = true;
+
+                otherProblem.focus();
+
+            } else {
+
+                otherProblemContainer.style.display = "none";
+
+                otherProblem.required = false;
+
+                otherProblem.value = "";
+            }
+
+        });
+
+
+        /* =========================================
+           SHOW MESSAGE
+        ========================================= */
+
+        function showMessage(text, isError = false) {
+
+            message.style.display = "block";
+
+            message.style.background = isError
+                ? "#fee2e2"
+                : "#dcfce7";
+
+            message.style.color = isError
+                ? "#991b1b"
+                : "#166534";
+
+            message.textContent = text;
+        }
+
+
+        /* =========================================
+           GET USER LOCATION
+        ========================================= */
+
+        locationButton.addEventListener("click", function () {
+
+            locationStatus.style.color = "#92400e";
+
+            locationStatus.textContent =
+                "Getting your location...";
+
+            latitude = null;
+            longitude = null;
+
+            if (!navigator.geolocation) {
+
+                locationStatus.style.color = "red";
+
+                locationStatus.textContent =
+                    "Geolocation is not supported by this browser.";
+
+                return;
+            }
+
+            locationButton.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+
+                function (position) {
+
+                    latitude = position.coords.latitude;
+
+                    longitude = position.coords.longitude;
+
+                    locationStatus.style.color = "#166534";
+
+                    locationStatus.textContent =
+                        `Location captured: ${latitude}, ${longitude}`;
+
+                    locationButton.disabled = false;
+                },
+
+                function (error) {
+
+                    console.error("Location Error:", error);
+
+                    latitude = null;
+                    longitude = null;
+
+                    locationStatus.style.color = "red";
+
+                    if (error.code === 1) {
+
+                        locationStatus.textContent =
+                            "Location permission denied. Please allow location access in your browser.";
+
+                    } else if (error.code === 2) {
+
+                        locationStatus.textContent =
+                            "Location unavailable. Please check your device location.";
+
+                    } else if (error.code === 3) {
+
+                        locationStatus.textContent =
+                            "Location request timed out. Please try again.";
+
+                    } else {
+
+                        locationStatus.textContent =
+                            "Unable to get your location.";
+                    }
+
+                    locationButton.disabled = false;
+                },
+
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                }
+            );
+
+        });
+
+
+        /* =========================================
+           SUBMIT COMPLAINT
+        ========================================= */
+
+        complaintForm.addEventListener("submit", async function (event) {
+
+            event.preventDefault();
+
+            message.style.display = "none";
+
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+
+                showMessage(
+                    "Please login first.",
+                    true
+                );
+
+                return;
+            }
+
+            /* CHECK GPS */
+
+            if (
+                latitude === null ||
+                longitude === null
+            ) {
+
+                showMessage(
+                    "Please click 'Get My Location' and wait until the location is captured.",
+                    true
+                );
+
+                return;
+            }
+
+            /* GET VALUES */
+
+            const selectedCategory = category.value;
+
+            const severity =
+                document.getElementById("severity").value;
+
+            const area =
+                document.getElementById("area").value.trim();
+
+            const landmark =
+                document.getElementById("landmark").value.trim();
+
+            const description =
+                document.getElementById("description").value.trim();
+
+            const photoInput =
+                document.getElementById("photo");
+
+
+            /* VALIDATE OTHER PROBLEM */
+
+            const customProblem = otherProblem.value.trim();
+
+            if (
+                selectedCategory === "Other" &&
+                !customProblem
+            ) {
+
+                showMessage(
+                    "Please enter the specific problem.",
+                    true
+                );
+
+                otherProblem.focus();
+
+                return;
+            }
+
+
+            /* PREPARE DESCRIPTION */
+
+            let finalDescription = description;
+
+            if (selectedCategory === "Other") {
+
+                finalDescription =
+                    "Other Problem: " + customProblem +
+                    "\n\nDescription: " + description;
+            }
+
+
+            /* CREATE FORMDATA */
+
+            const formData = new FormData();
+
+            formData.append("category", selectedCategory);
+
+            formData.append("severity", severity);
+
+            formData.append("area", area);
+
+            formData.append("landmark", landmark);
+
+            formData.append("description", finalDescription);
+
+            formData.append("latitude", latitude);
+
+            formData.append("longitude", longitude);
+
+
+            /* ADD PHOTO */
+
+            if (photoInput.files.length > 0) {
+
+                formData.append(
+                    "photo",
+                    photoInput.files[0]
+                );
+            }
+
+
+            /* SEND TO BACKEND */
+
+            try {
+
+                submitButton.disabled = true;
+
+                submitButton.textContent = "Submitting...";
+
+                showMessage("Submitting complaint...");
+
+                const response = await fetch(
+                    "/api/complaints",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        },
+
+                        body: formData
+                    }
+                );
+
+                let data;
+
+                try {
+
+                    data = await response.json();
+
+                } catch {
+
+                    throw new Error("Invalid server response.");
+                }
+
+                console.log("Server response:", data);
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        "Complaint submission failed."
+                    );
+                }
+
+
+                /* SUCCESS */
+
+                const complaintNumber =
+                    data.complaintNumber ||
+                    data.complaint_number ||
+                    data.complaint?.complaint_number ||
+                    data.complaint?.id;
+
+                showMessage(
+                    complaintNumber
+                        ? `Complaint submitted successfully. Complaint No: ${complaintNumber}`
+                        : "Complaint submitted successfully."
+                );
+
+
+                /* RESET FORM */
+
+                complaintForm.reset();
+
+                latitude = null;
+                longitude = null;
+
+                otherProblemContainer.style.display = "none";
+
+                otherProblem.required = false;
+
+                locationStatus.style.color = "#166534";
+
+                locationStatus.textContent =
+                    "Location not captured";
+
+            } catch (error) {
+
+                console.error(
+                    "Complaint submission error:",
+                    error
+                );
+
+                showMessage(
+                    error.message ||
+                    "Server connection failed. Please try again.",
+                    true
+                );
+
+            } finally {
+
+                submitButton.disabled = false;
+
+                submitButton.textContent =
+                    "Submit Complaint";
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>

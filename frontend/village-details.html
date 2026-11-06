@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Village Connect - Village Details</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7f5;
+            color: #1f2937;
+        }
+
+
+        header {
+            background: #176b45;
+            color: white;
+            padding: 18px 25px;
+        }
+
+
+        header .inner {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+
+        .back-btn {
+            border: none;
+            background: white;
+            color: #176b45;
+            padding: 10px 15px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #6b7280;
+        }
+
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+
+        .village-header {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow:
+                0 3px 12px rgba(0,0,0,0.08);
+            margin-bottom: 22px;
+        }
+
+
+        .village-header h2 {
+            margin: 0 0 7px;
+            color: #176b45;
+            font-size: 30px;
+        }
+
+
+        .location {
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+
+
+        .coordinates {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow:
+                0 3px 10px rgba(0,0,0,0.06);
+        }
+
+
+        .stat-card strong {
+            display: block;
+            font-size: 28px;
+            color: #176b45;
+        }
+
+
+        .stat-card span {
+            display: block;
+            margin-top: 7px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+
+        .grid {
+            display: grid;
+            grid-template-columns:
+                1fr 1fr;
+            gap: 22px;
+        }
+
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow:
+                0 3px 12px rgba(0,0,0,0.07);
+            margin-bottom: 22px;
+        }
+
+
+        .card h3 {
+            margin-top: 0;
+            color: #176b45;
+        }
+
+
+        .category-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 11px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+
+        .category-row:last-child {
+            border-bottom: none;
+        }
+
+
+        .category-count {
+            font-weight: bold;
+            color: #176b45;
+        }
+
+
+        .resident {
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+
+        .resident:last-child {
+            border-bottom: none;
+        }
+
+
+        .resident-name {
+            font-weight: bold;
+        }
+
+
+        .resident-info {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+
+        .office {
+            padding: 13px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+
+        .office-name {
+            font-weight: bold;
+            color: #176b45;
+        }
+
+
+        .office-info {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+
+        .complaint {
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+
+        .complaint:last-child {
+            border-bottom: none;
+        }
+
+
+        .complaint-number {
+            font-weight: bold;
+            color: #176b45;
+        }
+
+
+        .complaint-info {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+
+        .badge {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 15px;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+
+
+        .pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+
+        .forwarded {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+
+        .progress {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+
+        .resolved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+
+        .view-complaint {
+            display: inline-block;
+            margin-top: 8px;
+            color: #176b45;
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+
+        .empty {
+            color: #6b7280;
+            padding: 10px 0;
+        }
+
+
+        @media (max-width: 900px) {
+
+            .stats-grid {
+                grid-template-columns:
+                    repeat(3, 1fr);
+            }
+
+        }
+
+
+        @media (max-width: 650px) {
+
+            .stats-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .village-header h2 {
+                font-size: 24px;
+            }
+
+
+            header .inner {
+                align-items: flex-start;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="inner">
+
+        <h1>
+            Village Connect
+        </h1>
+
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+        >
+            ← Villages
+        </button>
+
+    </div>
+
+</header>
+
+
+
+<div class="container">
+
+
+    <div
+        id="loading"
+        class="loading"
+    >
+        Loading village...
+    </div>
+
+
+    <div
+        id="error"
+        class="error"
+        style="display:none;"
+    ></div>
+
+
+    <div
+        id="content"
+        style="display:none;"
+    >
+
+
+        <div class="village-header">
+
+            <h2 id="villageName">
+                -
+            </h2>
+
+
+            <div
+                class="location"
+                id="villageLocation"
+            >
+                -
+            </div>
+
+
+            <div
+                class="coordinates"
+                id="coordinates"
+            >
+                -
+            </div>
+
+        </div>
+
+
+
+        <div class="stats-grid">
+
+
+            <div class="stat-card">
+
+                <strong id="totalComplaints">
+                    0
+                </strong>
+
+                <span>
+                    Total Complaints
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <strong id="pending">
+                    0
+                </strong>
+
+                <span>
+                    Pending
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <strong id="forwarded">
+                    0
+                </strong>
+
+                <span>
+                    Forwarded
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <strong id="inProgress">
+                    0
+                </strong>
+
+                <span>
+                    In Progress
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <strong id="resolved">
+                    0
+                </strong>
+
+                <span>
+                    Resolved
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="grid">
+
+
+            <div>
+
+
+                <div class="card">
+
+                    <h3>
+                        Complaints by Category
+                    </h3>
+
+
+                    <div id="categories">
+                    </div>
+
+                </div>
+
+
+
+                <div class="card">
+
+                    <h3>
+                        Recent Complaints
+                    </h3>
+
+
+                    <div id="complaints">
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div>
+
+
+                <div class="card">
+
+                    <h3>
+                        Village Residents
+                    </h3>
+
+
+                    <div id="residents">
+                    </div>
+
+                </div>
+
+
+
+                <div class="card">
+
+                    <h3>
+                        Local Offices
+                    </h3>
+
+
+                    <div id="offices">
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+const token =
+    localStorage.getItem("token");
+
+
+const userString =
+    localStorage.getItem("user");
+
+
+if (!token || !userString) {
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const villageId =
+    params.get("id");
+
+
+
+function goBack() {
+
+    window.location.href =
+        "villages.html";
+
+}
+
+
+// ============================================================
+// ESCAPE HTML
+// ============================================================
+
+function escapeHtml(value) {
+
+    return String(
+        value ?? ""
+    ).replace(
+        /[&<>"']/g,
+        character => {
+
+            return {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[character];
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// STATUS CLASS
+// ============================================================
+
+function statusClass(status) {
+
+    if (status === "Pending") {
+        return "pending";
+    }
+
+    if (status === "Forwarded") {
+        return "forwarded";
+    }
+
+    if (status === "In Progress") {
+        return "progress";
+    }
+
+    if (status === "Resolved") {
+        return "resolved";
+    }
+
+    return "pending";
+
+}
+
+
+// ============================================================
+// LOAD VILLAGE
+// ============================================================
+
+async function loadVillage() {
+
+    if (!villageId) {
+
+        showError(
+            "Village ID is missing."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/villages/${villageId}`,
+                {
+                    headers: {
+                        "Authorization":
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load village"
+            );
+
+        }
+
+
+        renderVillage(
+            data
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError(
+            error.message
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// RENDER VILLAGE
+// ============================================================
+
+function renderVillage(data) {
+
+    const village =
+        data.village;
+
+
+    const statistics =
+        data.statistics || {};
+
+
+    const complaints =
+        statistics.complaints || {};
+
+
+    document.getElementById(
+        "villageName"
+    ).textContent =
+        village.name || "-";
+
+
+    document.getElementById(
+        "villageLocation"
+    ).textContent =
+        `${village.district || "-"}, ${village.state || "-"}`;
+
+
+    document.getElementById(
+        "coordinates"
+    ).textContent =
+        `📍 Latitude: ${village.lat ?? "-"} | Longitude: ${village.lng ?? "-"}`;
+
+
+    document.getElementById(
+        "totalComplaints"
+    ).textContent =
+        Number(complaints.total || 0);
+
+
+    document.getElementById(
+        "pending"
+    ).textContent =
+        Number(complaints.pending || 0);
+
+
+    document.getElementById(
+        "forwarded"
+    ).textContent =
+        Number(complaints.forwarded || 0);
+
+
+    document.getElementById(
+        "inProgress"
+    ).textContent =
+        Number(complaints.in_progress || 0);
+
+
+    document.getElementById(
+        "resolved"
+    ).textContent =
+        Number(complaints.resolved || 0);
+
+
+    renderCategories(
+        statistics.categories || []
+    );
+
+
+    renderResidents(
+        data.residents || []
+    );
+
+
+    renderOffices(
+        data.offices || []
+    );
+
+
+    renderComplaints(
+        data.recentComplaints || []
+    );
+
+
+    document.getElementById(
+        "loading"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "content"
+    ).style.display =
+        "block";
+
+}
+
+
+// ============================================================
+// CATEGORIES
+// ============================================================
+
+function renderCategories(
+    categories
+) {
+
+    const element =
+        document.getElementById(
+            "categories"
+        );
+
+
+    if (categories.length === 0) {
+
+        element.innerHTML = `
+            <div class="empty">
+                No complaint data available.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    element.innerHTML =
+        categories
+            .map(category => `
+
+                <div class="category-row">
+
+                    <span>
+                        ${escapeHtml(
+                            category.category
+                        )}
+                    </span>
+
+                    <span class="category-count">
+                        ${Number(
+                            category.count || 0
+                        )}
+                    </span>
+
+                </div>
+
+            `)
+            .join("");
+
+}
+
+
+// ============================================================
+// RESIDENTS
+// ============================================================
+
+function renderResidents(
+    residents
+) {
+
+    const element =
+        document.getElementById(
+            "residents"
+        );
+
+
+    if (residents.length === 0) {
+
+        element.innerHTML = `
+            <div class="empty">
+                No residents registered.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    element.innerHTML =
+        residents
+            .map(resident => `
+
+                <div class="resident">
+
+                    <div class="resident-name">
+
+                        ${escapeHtml(
+                            resident.name
+                        )}
+
+                    </div>
+
+
+                    <div class="resident-info">
+
+                        Mobile:
+                        ${escapeHtml(
+                            resident.mobile || "-"
+                        )}
+
+                        <br>
+
+                        Role:
+                        ${escapeHtml(
+                            resident.role || "-"
+                        )}
+
+                        <br>
+
+                        Status:
+                        ${escapeHtml(
+                            resident.status || "-"
+                        )}
+
+                    </div>
+
+                </div>
+
+            `)
+            .join("");
+
+}
+
+
+// ============================================================
+// OFFICES
+// ============================================================
+
+function renderOffices(
+    offices
+) {
+
+    const element =
+        document.getElementById(
+            "offices"
+        );
+
+
+    if (offices.length === 0) {
+
+        element.innerHTML = `
+            <div class="empty">
+                No offices assigned to this village.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    element.innerHTML =
+        offices
+            .map(office => `
+
+                <div class="office">
+
+                    <div class="office-name">
+
+                        ${escapeHtml(
+                            office.name
+                        )}
+
+                    </div>
+
+
+                    <div class="office-info">
+
+                        Type:
+                        ${escapeHtml(
+                            office.office_type || "-"
+                        )}
+
+                        <br>
+
+                        Phone:
+                        ${escapeHtml(
+                            office.contact_phone || "-"
+                        )}
+
+                        <br>
+
+                        Location:
+                        ${office.latitude ?? "-"},
+                        ${office.longitude ?? "-"}
+
+                    </div>
+
+                </div>
+
+            `)
+            .join("");
+
+}
+
+
+// ============================================================
+// COMPLAINTS
+// ============================================================
+
+function renderComplaints(
+    complaints
+) {
+
+    const element =
+        document.getElementById(
+            "complaints"
+        );
+
+
+    if (complaints.length === 0) {
+
+        element.innerHTML = `
+            <div class="empty">
+                No complaints reported in this village.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    element.innerHTML =
+        complaints
+            .map(complaint => `
+
+                <div class="complaint">
+
+                    <div class="complaint-number">
+
+                        ${escapeHtml(
+                            complaint.complaint_number
+                        )}
+
+                        <span
+                            class="badge ${statusClass(
+                                complaint.status
+                            )}"
+                        >
+
+                            ${escapeHtml(
+                                complaint.status
+                            )}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="complaint-info">
+
+                        ${escapeHtml(
+                            complaint.category
+                        )}
+
+                        ·
+
+                        ${escapeHtml(
+                            complaint.severity
+                        )}
+
+                        ·
+
+                        ${escapeHtml(
+                            complaint.area
+                        )}
+
+                    </div>
+
+
+                    <div class="complaint-info">
+
+                        Office:
+                        ${escapeHtml(
+                            complaint.office_name ||
+                            "Not assigned"
+                        )}
+
+                    </div>
+
+
+                    <a
+                        class="view-complaint"
+                        href="complaint-details.html?id=${complaint.id}"
+                    >
+
+                        View Complaint →
+
+                    </a>
+
+                </div>
+
+            `)
+            .join("");
+
+}
+
+
+// ============================================================
+// ERROR
+// ============================================================
+
+function showError(message) {
+
+    document.getElementById(
+        "loading"
+    ).style.display =
+        "none";
+
+
+    const error =
+        document.getElementById(
+            "error"
+        );
+
+
+    error.textContent =
+        message;
+
+
+    error.style.display =
+        "block";
+
+}
+
+
+// ============================================================
+// START
+// ============================================================
+
+loadVillage();
+
+</script>
+
+
+</body>
+
+</html>

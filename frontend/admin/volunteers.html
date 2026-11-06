@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Volunteers - Village Connect</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f5;
+            color: #26352b;
+        }
+
+        header {
+            background: #176b3a;
+            color: white;
+            padding: 18px 5%;
+        }
+
+        header h1 {
+            margin-bottom: 12px;
+        }
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1500px;
+            margin: 30px auto;
+        }
+
+        .page-heading {
+            margin-bottom: 26px;
+        }
+
+        .page-heading h2 {
+            color: #176b3a;
+            margin-bottom: 10px;
+        }
+
+        .page-heading p {
+            line-height: 1.5;
+        }
+
+        .summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 24px 28px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+            min-width: 210px;
+        }
+
+        .summary-card strong {
+            display: block;
+            font-size: 30px;
+            color: #176b3a;
+            margin-top: 10px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+            overflow-x: auto;
+        }
+
+        .table-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .table-heading h3 {
+            color: #176b3a;
+        }
+
+        button {
+            border: none;
+            border-radius: 6px;
+            padding: 11px 16px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .refresh-btn {
+            background: #176b3a;
+        }
+
+        .approve-btn {
+            background: #198754;
+        }
+
+        .reject-btn {
+            background: #d97706;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+        }
+
+        button:hover:not(:disabled) {
+            opacity: 0.88;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 15px 12px;
+            border-bottom: 1px solid #e5e9e6;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #eaf4ed;
+            color: #176b3a;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .status-approved {
+            background: #d7f3df;
+            color: #176b3a;
+        }
+
+        .status-pending {
+            background: #fff0c2;
+            color: #8a5b00;
+        }
+
+        .status-rejected {
+            background: #ffe0e0;
+            color: #a32222;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        #message {
+            display: none;
+            margin-bottom: 22px;
+            padding: 14px 16px;
+            border-radius: 7px;
+            line-height: 1.5;
+        }
+
+        .message-success {
+            display: block !important;
+            background: #d7f3df;
+            color: #176b3a;
+        }
+
+        .message-error {
+            display: block !important;
+            background: #ffe0e0;
+            color: #a32222;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 30px;
+            color: #68756c;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+            }
+
+            .table-container {
+                padding: 14px;
+            }
+
+            .summary-card {
+                flex: 1;
+                min-width: 140px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Village Connect</h1>
+
+    <nav>
+        <a href="/home.html">Home</a>
+        <a href="/complaints.html">Complaints</a>
+        <a href="/villages.html">Villages</a>
+        <a href="/events.html">Events</a>
+        <a href="/polls.html">Polls</a>
+        <a href="/admin/dashboard.html">Dashboard</a>
+        <a href="/admin/volunteers.html">Manage Volunteers</a>
+        <a href="#" id="logoutLink">Logout</a>
+    </nav>
+</header>
+
+<main class="container">
+
+    <section class="page-heading">
+        <h2>Community Volunteer Management</h2>
+        <p>View and manage volunteer applications.</p>
+    </section>
+
+    <div id="message"></div>
+
+    <section class="summary">
+
+        <div class="summary-card">
+            Total Volunteers
+            <strong id="totalCount">0</strong>
+        </div>
+
+        <div class="summary-card">
+            Pending Approval
+            <strong id="pendingCount">0</strong>
+        </div>
+
+        <div class="summary-card">
+            Approved
+            <strong id="approvedCount">0</strong>
+        </div>
+
+    </section>
+
+    <section class="table-container">
+
+        <div class="table-heading">
+            <h3>Volunteer Applications</h3>
+
+            <button class="refresh-btn" id="refreshBtn">
+                Refresh
+            </button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Volunteer</th>
+                    <th>Village</th>
+                    <th>Skills</th>
+                    <th>Availability</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="volunteerTableBody">
+                <tr>
+                    <td colspan="7" class="empty-message">
+                        Loading volunteer applications...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </section>
+
+</main>
+
+<script>
+    const API_URL = "/api/volunteers";
+
+    const token = localStorage.getItem("token");
+
+    const tableBody = document.getElementById("volunteerTableBody");
+    const messageBox = document.getElementById("message");
+
+    let volunteers = [];
+
+    function showMessage(message, type) {
+        messageBox.textContent = message;
+
+        messageBox.className =
+            type === "success"
+                ? "message-success"
+                : "message-error";
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+
+    function escapeHTML(value) {
+        return String(value ?? "").replace(/[&<>"']/g, function(char) {
+            return {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            }[char];
+        });
+    }
+
+    function getVolunteerStatus(volunteer) {
+        const status = String(volunteer.status || "").toLowerCase();
+
+        if (status === "approved" || status === "rejected") {
+            return status;
+        }
+
+        if (
+            volunteer.approved === true ||
+            Number(volunteer.approved) === 1
+        ) {
+            return "approved";
+        }
+
+        return "pending";
+    }
+
+    function getVolunteerName(volunteer) {
+        return volunteer.name ||
+            volunteer.full_name ||
+            volunteer.user_name ||
+            volunteer.username ||
+            volunteer.volunteer_name ||
+            "Volunteer";
+    }
+
+    function getVillageName(volunteer) {
+        return volunteer.village_name ||
+            volunteer.village ||
+            "Not available";
+    }
+
+    function getSkills(volunteer) {
+        const skills = volunteer.skills;
+
+        if (Array.isArray(skills)) {
+            return skills.join(", ");
+        }
+
+        return skills || "Not specified";
+    }
+
+    function updateSummary() {
+        const approved = volunteers.filter(function(volunteer) {
+            return getVolunteerStatus(volunteer) === "approved";
+        }).length;
+
+        const pending = volunteers.filter(function(volunteer) {
+            return getVolunteerStatus(volunteer) === "pending";
+        }).length;
+
+        document.getElementById("totalCount").textContent =
+            volunteers.length;
+
+        document.getElementById("approvedCount").textContent =
+            approved;
+
+        document.getElementById("pendingCount").textContent =
+            pending;
+    }
+
+    async function loadVolunteers() {
+        if (!token) {
+            showMessage(
+                "Login session not found. Please log in again.",
+                "error"
+            );
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty-message">
+                        Please log in to continue.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-message">
+                    Loading volunteer applications...
+                </td>
+            </tr>
+        `;
+
+        try {
+            const response = await fetch(API_URL, {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "Unable to load volunteers."
+                );
+            }
+
+            volunteers = Array.isArray(data)
+                ? data
+                : data.volunteers || data.data || [];
+
+            if (!Array.isArray(volunteers)) {
+                volunteers = [];
+            }
+
+            updateSummary();
+            displayVolunteers();
+
+        } catch (error) {
+            console.error("Volunteer loading error:", error);
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty-message">
+                        Unable to load volunteer applications.
+                    </td>
+                </tr>
+            `;
+
+            showMessage(error.message, "error");
+        }
+    }
+
+    function displayVolunteers() {
+        if (volunteers.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty-message">
+                        No volunteer applications found.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tableBody.innerHTML = volunteers.map(function(volunteer) {
+            const status = getVolunteerStatus(volunteer);
+            const id = Number(volunteer.id);
+
+            if (!Number.isSafeInteger(id) || id <= 0) {
+                return "";
+            }
+
+            let statusHTML = "";
+
+            if (status === "approved") {
+                statusHTML = `
+                    <span class="status status-approved">
+                        Approved
+                    </span>
+                `;
+            } else if (status === "rejected") {
+                statusHTML = `
+                    <span class="status status-rejected">
+                        Rejected
+                    </span>
+                `;
+            } else {
+                statusHTML = `
+                    <span class="status status-pending">
+                        Pending Approval
+                    </span>
+                `;
+            }
+
+            let approvalButtons = "";
+
+            if (status === "approved") {
+                approvalButtons = `
+                    <button class="reject-btn"
+                        onclick="updateApproval(${id}, 'rejected')">
+                        Reject
+                    </button>
+                `;
+            } else {
+                approvalButtons = `
+                    <button class="approve-btn"
+                        onclick="updateApproval(${id}, 'approved')">
+                        Approve
+                    </button>
+
+                    <button class="reject-btn"
+                        onclick="updateApproval(${id}, 'rejected')">
+                        Reject
+                    </button>
+                `;
+            }
+
+            return `
+                <tr>
+                    <td>${escapeHTML(id)}</td>
+
+                    <td>
+                        ${escapeHTML(getVolunteerName(volunteer))}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(getVillageName(volunteer))}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(getSkills(volunteer))}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            volunteer.availability || "Not specified"
+                        )}
+                    </td>
+
+                    <td>${statusHTML}</td>
+
+                    <td>
+                        <div class="actions">
+                            ${approvalButtons}
+
+                            <button class="delete-btn"
+                                onclick="deleteVolunteer(${id})">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    // APPROVE / REJECT VOLUNTEER
+    async function updateApproval(id, status) {
+        if (!["approved", "rejected"].includes(status)) {
+            showMessage("Invalid volunteer status.", "error");
+            return;
+        }
+
+        const action = status === "approved" ? "approve" : "reject";
+
+        if (!confirm(
+            "Are you sure you want to " + action + " this volunteer?"
+        )) {
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `${API_URL}/${id}/approval`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+
+                    // Backend expects the status text, not 1 or 0.
+                    body: JSON.stringify({
+                        status: status
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "Unable to update volunteer status."
+                );
+            }
+
+            showMessage(
+                data.message || "Volunteer status updated successfully.",
+                "success"
+            );
+
+            await loadVolunteers();
+
+        } catch (error) {
+            console.error("Approval update error:", error);
+            showMessage(error.message, "error");
+        }
+    }
+
+    // DELETE VOLUNTEER
+    async function deleteVolunteer(id) {
+        if (!confirm(
+            "Are you sure you want to delete this volunteer application?"
+        )) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: "DELETE",
+
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "Unable to delete volunteer."
+                );
+            }
+
+            showMessage(
+                data.message || "Volunteer application deleted successfully.",
+                "success"
+            );
+
+            await loadVolunteers();
+
+        } catch (error) {
+            console.error("Volunteer deletion error:", error);
+            showMessage(error.message, "error");
+        }
+    }
+
+    document.getElementById("refreshBtn").addEventListener(
+        "click",
+        loadVolunteers
+    );
+
+    document.getElementById("logoutLink").addEventListener(
+        "click",
+        function(event) {
+            event.preventDefault();
+
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+
+            window.location.href = "/login.html";
+        }
+    );
+
+    loadVolunteers();
+</script>
+
+</body>
+</html>

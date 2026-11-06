@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Village Connect - Profile</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body class="dashboard-page">
+
+    <!-- Navigation -->
+
+    <header class="navbar">
+
+        <div class="nav-inner">
+
+            <a
+                href="home.html"
+                class="logo"
+            >
+                Village Connect
+            </a>
+
+            <nav class="nav-links">
+
+                <a href="home.html">
+                    Home
+                </a>
+
+                <a href="report.html">
+                    Report
+                </a>
+
+                <a href="complaints.html">
+                    Complaints
+                </a>
+
+                <a href="events.html">
+                    Events
+                </a>
+
+                <a href="polls.html">
+                    Polls
+                </a>
+
+                <a href="profile.html" class="active">
+                    Profile
+                </a>
+
+                <button
+                    class="nav-logout"
+                    onclick="logout()"
+                >
+                    Logout
+                </button>
+
+            </nav>
+
+        </div>
+
+    </header>
+
+
+    <!-- Main -->
+
+    <main class="profile-page">
+
+        <section class="profile-header">
+
+            <div>
+
+                <p class="page-label">
+                    ACCOUNT
+                </p>
+
+                <h1>
+                    My Profile
+                </h1>
+
+                <p>
+                    View your Village Connect account information.
+                </p>
+
+            </div>
+
+            <a
+                href="home.html"
+                class="btn secondary"
+            >
+                ← Back to Home
+            </a>
+
+        </section>
+
+
+        <!-- Profile Card -->
+
+        <section class="profile-card">
+
+            <div class="profile-avatar" id="profileAvatar">
+                U
+            </div>
+
+            <div class="profile-main-info">
+
+                <h2 id="profileName">
+                    Loading...
+                </h2>
+
+                <p id="profileMobile">
+                    Loading...
+                </p>
+
+                <span
+                    class="profile-badge"
+                    id="profileRole"
+                >
+                    Resident
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- Information -->
+
+        <section class="profile-details">
+
+            <div class="profile-section">
+
+                <h2>
+                    Personal Information
+                </h2>
+
+                <div class="profile-grid">
+
+                    <div class="profile-field">
+
+                        <label>
+                            Full Name
+                        </label>
+
+                        <div
+                            class="profile-value"
+                            id="name"
+                        >
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="profile-field">
+
+                        <label>
+                            Mobile Number
+                        </label>
+
+                        <div
+                            class="profile-value"
+                            id="mobile"
+                        >
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="profile-field">
+
+                        <label>
+                            Email
+                        </label>
+
+                        <div
+                            class="profile-value"
+                            id="email"
+                        >
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="profile-field">
+
+                        <label>
+                            Occupation
+                        </label>
+
+                        <div
+                            class="profile-value"
+                            id="occupation"
+                        >
+                            -
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-section">
+
+                <h2>
+                    Account Information
+                </h2>
+
+                <div class="profile-grid">
+
+                    <div class="profile-field">
+
+                        <label>
+                            User ID
+                        </label>
+
+                        <div
+                            class="profile-value"
+                            id="userId"
+                        >
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="profile-field">
+
+                        <label>
+                            Account Role
+                        </label>
+
+                        <div
+                            class="profile-value"
+                            id="role"
+                        >
+                            Resident
+                        </div>
+
+                    </div>
+
+
+                    <div class="profile-field">
+
+                        <label>
+                            Account Status
+                        </label>
+
+                        <div class="profile-value status-active">
+                            Active
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Quick Actions -->
+
+        <section class="profile-actions">
+
+            <h2>
+                Quick Actions
+            </h2>
+
+            <div class="profile-action-grid">
+
+                <a
+                    href="report.html"
+                    class="profile-action"
+                >
+
+                    <span class="action-icon">
+                        📢
+                    </span>
+
+                    <div>
+                        <strong>
+                            Report a Problem
+                        </strong>
+
+                        <p>
+                            Report a new village issue.
+                        </p>
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="complaints.html"
+                    class="profile-action"
+                >
+
+                    <span class="action-icon">
+                        📋
+                    </span>
+
+                    <div>
+                        <strong>
+                            My Complaints
+                        </strong>
+
+                        <p>
+                            Track your submitted complaints.
+                        </p>
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="events.html"
+                    class="profile-action"
+                >
+
+                    <span class="action-icon">
+                        📅
+                    </span>
+
+                    <div>
+                        <strong>
+                            Community Events
+                        </strong>
+
+                        <p>
+                            View upcoming village events.
+                        </p>
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="volunteers.html"
+                    class="profile-action"
+                >
+
+                    <span class="action-icon">
+                        🤝
+                    </span>
+
+                    <div>
+                        <strong>
+                            Volunteer
+                        </strong>
+
+                        <p>
+                            Participate in community activities.
+                        </p>
+                    </div>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <div
+            id="message"
+            class="profile-message"
+        ></div>
+
+    </main>
+
+
+    <!-- Footer -->
+
+    <footer class="landing-footer">
+
+        <div>
+
+            <strong>
+                Village Connect
+            </strong>
+
+            <p>
+                Connecting residents with their community
+                and local authorities.
+            </p>
+
+        </div>
+
+        <div class="footer-links">
+
+            <a href="home.html">
+                Home
+            </a>
+
+            <a href="complaints.html">
+                Complaints
+            </a>
+
+            <a href="events.html">
+                Events
+            </a>
+
+            <a href="profile.html">
+                Profile
+            </a>
+
+        </div>
+
+        <div class="footer-bottom">
+
+            © 2026 Village Connect
+
+        </div>
+
+    </footer>
+
+
+<script>
+
+const API_URL = "/api";
+
+const token =
+    localStorage.getItem("token");
+
+const storedUser =
+    JSON.parse(
+        localStorage.getItem("user") || "null"
+    );
+
+
+/*
+    Check login
+*/
+
+if (!token || !storedUser) {
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+/*
+    Load profile
+*/
+
+async function loadProfile() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/auth/me`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Authorization":
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok || !result.success) {
+
+            throw new Error(
+                result.message ||
+                "Unable to load profile"
+            );
+
+        }
+
+
+        const user =
+            result.user;
+
+
+        /*
+            Update local storage
+        */
+
+        localStorage.setItem(
+            "user",
+            JSON.stringify(user)
+        );
+
+
+        /*
+            Name
+        */
+
+        const name =
+            user.name || "User";
+
+
+        document.getElementById(
+            "profileName"
+        ).textContent = name;
+
+
+        document.getElementById(
+            "name"
+        ).textContent =
+            user.name || "-";
+
+
+        /*
+            Mobile
+        */
+
+        document.getElementById(
+            "profileMobile"
+        ).textContent =
+            user.mobile || "-";
+
+
+        document.getElementById(
+            "mobile"
+        ).textContent =
+            user.mobile || "-";
+
+
+        /*
+            Email
+        */
+
+        document.getElementById(
+            "email"
+        ).textContent =
+            user.email || "Not provided";
+
+
+        /*
+            Occupation
+        */
+
+        document.getElementById(
+            "occupation"
+        ).textContent =
+            user.occupation || "Not provided";
+
+
+        /*
+            User ID
+        */
+
+        document.getElementById(
+            "userId"
+        ).textContent =
+            user.id || "-";
+
+
+        /*
+            Role
+        */
+
+        const role =
+            user.role ||
+            "resident";
+
+
+        document.getElementById(
+            "profileRole"
+        ).textContent =
+            role;
+
+
+        document.getElementById(
+            "role"
+        ).textContent =
+            role;
+
+
+        /*
+            Avatar
+        */
+
+        document.getElementById(
+            "profileAvatar"
+        ).textContent =
+            name
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Profile error:",
+            error
+        );
+
+
+        /*
+            Fallback to stored user
+            if API temporarily fails.
+        */
+
+        if (storedUser) {
+
+            document.getElementById(
+                "profileName"
+            ).textContent =
+                storedUser.name || "User";
+
+
+            document.getElementById(
+                "profileMobile"
+            ).textContent =
+                storedUser.mobile || "-";
+
+
+            document.getElementById(
+                "name"
+            ).textContent =
+                storedUser.name || "-";
+
+
+            document.getElementById(
+                "mobile"
+            ).textContent =
+                storedUser.mobile || "-";
+
+
+            document.getElementById(
+                "email"
+            ).textContent =
+                storedUser.email || "Not provided";
+
+
+            document.getElementById(
+                "occupation"
+            ).textContent =
+                storedUser.occupation ||
+                "Not provided";
+
+
+            document.getElementById(
+                "userId"
+            ).textContent =
+                storedUser.id || "-";
+
+
+            const role =
+                storedUser.role ||
+                "resident";
+
+
+            document.getElementById(
+                "profileRole"
+            ).textContent =
+                role;
+
+
+            document.getElementById(
+                "role"
+            ).textContent =
+                role;
+
+
+            document.getElementById(
+                "profileAvatar"
+            ).textContent =
+                (storedUser.name || "U")
+                    .charAt(0)
+                    .toUpperCase();
+
+        }
+        else {
+
+            document.getElementById(
+                "message"
+            ).textContent =
+                "Unable to load profile.";
+
+        }
+
+    }
+
+}
+
+
+/*
+    Logout
+*/
+
+function logout() {
+
+    localStorage.removeItem(
+        "token"
+    );
+
+    localStorage.removeItem(
+        "user"
+    );
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+/*
+    Start
+*/
+
+loadProfile();
+
+</script>
+
+</body>
+
+</html>

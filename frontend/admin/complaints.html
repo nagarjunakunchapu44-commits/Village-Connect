@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Admin - Complaints | Village Connect</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        header {
+            background: #1e3a8a;
+            color: white;
+            padding: 18px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        header .user-info {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: 25px auto;
+            padding: 0 20px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .back {
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .logout {
+            border: none;
+            background: #dc2626;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .logout:hover {
+            background: #b91c1c;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            margin-bottom: 20px;
+        }
+
+        .filters h2 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .clear-btn {
+            margin-top: 12px;
+            padding: 9px 15px;
+            border: 1px solid #6b7280;
+            background: white;
+            color: #374151;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .clear-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .message {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.error {
+            display: block;
+            color: #b91c1c;
+            background: #fee2e2;
+        }
+
+        .message.info {
+            display: block;
+            color: #1d4ed8;
+            background: #dbeafe;
+        }
+
+        .complaints-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .complaint-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            border-left: 5px solid #2563eb;
+        }
+
+        .complaint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .complaint-number {
+            font-size: 17px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        .badges {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .forwarded {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .in-progress {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .resolved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .low {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .high {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        .severe {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail {
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 7px;
+        }
+
+        .detail-label {
+            display: block;
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-weight: bold;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .description {
+            background: #f9fafb;
+            padding: 13px;
+            border-radius: 7px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .office {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 13px;
+            border-radius: 7px;
+            margin-bottom: 15px;
+        }
+
+        .office strong {
+            color: #1e40af;
+        }
+
+        .office.not-assigned {
+            background: #fff7ed;
+            border-color: #fed7aa;
+        }
+
+        .office.not-assigned strong {
+            color: #9a3412;
+        }
+
+        .complaint-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 15px;
+        }
+
+        .date {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .view-btn {
+            display: inline-block;
+            text-decoration: none;
+            background: #2563eb;
+            color: white;
+            padding: 10px 17px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .view-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .empty {
+            background: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            color: #6b7280;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 1000px) {
+
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .details-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 650px) {
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .complaint-header {
+                flex-direction: column;
+            }
+
+            .badges {
+                justify-content: flex-start;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<header>
+
+    <div>
+        <h1>Village Connect — Complaints</h1>
+    </div>
+
+    <div class="user-info" id="userInfo">
+        Official
+    </div>
+
+</header>
+
+
+<div class="container">
+
+    <div class="topbar">
+
+        <a href="dashboard.html" class="back">
+            ← Back to Dashboard
+        </a>
+
+        <button class="logout" onclick="logout()">
+            Logout
+        </button>
+
+    </div>
+
+
+    <!-- STATISTICS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <div class="number" id="totalCount">0</div>
+            <div class="label">Total Complaints</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="number" id="pendingCount">0</div>
+            <div class="label">Pending</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="number" id="forwardedCount">0</div>
+            <div class="label">Forwarded</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="number" id="progressCount">0</div>
+            <div class="label">In Progress</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="number" id="resolvedCount">0</div>
+            <div class="label">Resolved</div>
+        </div>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="filters">
+
+        <h2>
+            Search & Filter Complaints
+        </h2>
+
+        <div class="filter-grid">
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search complaint number, resident, area..."
+                oninput="applyFilters()"
+            >
+
+            <select
+                id="statusFilter"
+                onchange="applyFilters()"
+            >
+
+                <option value="">
+                    All Statuses
+                </option>
+
+                <option value="Pending">
+                    Pending
+                </option>
+
+                <option value="Forwarded">
+                    Forwarded
+                </option>
+
+                <option value="In Progress">
+                    In Progress
+                </option>
+
+                <option value="Resolved">
+                    Resolved
+                </option>
+
+            </select>
+
+
+            <select
+                id="categoryFilter"
+                onchange="applyFilters()"
+            >
+
+                <option value="">
+                    All Categories
+                </option>
+
+                <option value="Road">
+                    Road
+                </option>
+
+                <option value="Drainage">
+                    Drainage
+                </option>
+
+                <option value="Garbage">
+                    Garbage
+                </option>
+
+                <option value="Waterlogging">
+                    Waterlogging
+                </option>
+
+                <option value="Other">
+                    Other
+                </option>
+
+            </select>
+
+
+            <select
+                id="officeFilter"
+                onchange="applyFilters()"
+            >
+
+                <option value="">
+                    All Offices
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            class="clear-btn"
+            onclick="clearFilters()"
+        >
+            Clear Filters
+        </button>
+
+    </div>
+
+
+    <div id="message" class="message"></div>
+
+
+    <div
+        id="loading"
+        class="loading"
+    >
+        Loading complaints...
+    </div>
+
+
+    <div
+        id="complaintsContainer"
+        class="complaints-container"
+        style="display:none;"
+    ></div>
+
+</div>
+
+
+<script>
+
+    const token =
+        localStorage.getItem("token");
+
+    const userString =
+        localStorage.getItem("user");
+
+
+    /*
+     * AUTHENTICATION CHECK
+     */
+
+    if (!token || !userString) {
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    let user;
+
+    try {
+
+        user =
+            JSON.parse(userString);
+
+    } catch (error) {
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    if (
+        !user ||
+        (
+            user.role !== "admin" &&
+            user.role !== "official"
+        )
+    ) {
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    document.getElementById(
+        "userInfo"
+    ).textContent =
+        `${user.name || "Official"} (${user.role})`;
+
+
+    let complaints = [];
+
+    let offices = [];
+
+    let officeMap = {};
+
+
+    /*
+     * LOAD COMPLAINTS
+     */
+
+    async function loadComplaints() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/complaints/all",
+                    {
+                        headers: {
+                            "Authorization":
+                                `Bearer ${token}`
+                        }
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    "Unable to load complaints"
+                );
+
+            }
+
+
+            complaints =
+                Array.isArray(data.complaints)
+                    ? data.complaints
+                    : [];
+
+
+            await loadOffices();
+
+            updateStatistics();
+
+            populateOfficeFilter();
+
+            applyFilters();
+
+
+            document.getElementById(
+                "loading"
+            ).style.display = "none";
+
+
+            document.getElementById(
+                "complaintsContainer"
+            ).style.display = "grid";
+
+
+        } catch (error) {
+
+            console.error(
+                "Complaint loading error:",
+                error
+            );
+
+
+            document.getElementById(
+                "loading"
+            ).style.display = "none";
+
+
+            showMessage(
+                error.message,
+                "error"
+            );
+
+        }
+
+    }
+
+
+    /*
+     * LOAD OFFICES
+     */
+
+    async function loadOffices() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/offices",
+                    {
+                        headers: {
+                            "Authorization":
+                                `Bearer ${token}`
+                        }
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    "Unable to load offices"
+                );
+
+            }
+
+
+            offices =
+                Array.isArray(data.offices)
+                    ? data.offices
+                    : [];
+
+
+            officeMap = {};
+
+
+            offices.forEach(
+                office => {
+
+                    officeMap[
+                        String(office.id)
+                    ] = office;
+
+                }
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Office loading error:",
+                error
+            );
+
+            offices = [];
+            officeMap = {};
+
+        }
+
+    }
+
+
+    /*
+     * STATISTICS
+     */
+
+    function updateStatistics() {
+
+        const total =
+            complaints.length;
+
+
+        const pending =
+            complaints.filter(
+                c => c.status === "Pending"
+            ).length;
+
+
+        const forwarded =
+            complaints.filter(
+                c => c.status === "Forwarded"
+            ).length;
+
+
+        const progress =
+            complaints.filter(
+                c => c.status === "In Progress"
+            ).length;
+
+
+        const resolved =
+            complaints.filter(
+                c => c.status === "Resolved"
+            ).length;
+
+
+        document.getElementById(
+            "totalCount"
+        ).textContent = total;
+
+
+        document.getElementById(
+            "pendingCount"
+        ).textContent = pending;
+
+
+        document.getElementById(
+            "forwardedCount"
+        ).textContent = forwarded;
+
+
+        document.getElementById(
+            "progressCount"
+        ).textContent = progress;
+
+
+        document.getElementById(
+            "resolvedCount"
+        ).textContent = resolved;
+
+    }
+
+
+    /*
+     * OFFICE FILTER
+     */
+
+    function populateOfficeFilter() {
+
+        const select =
+            document.getElementById(
+                "officeFilter"
+            );
+
+
+        select.innerHTML = `
+            <option value="">
+                All Offices
+            </option>
+        `;
+
+
+        offices.forEach(
+            office => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    office.id;
+
+
+                option.textContent =
+                    office.name;
+
+
+                select.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+     * FILTERS
+     */
+
+    function applyFilters() {
+
+        const search =
+            document.getElementById(
+                "searchInput"
+            ).value
+                .trim()
+                .toLowerCase();
+
+
+        const status =
+            document.getElementById(
+                "statusFilter"
+            ).value;
+
+
+        const category =
+            document.getElementById(
+                "categoryFilter"
+            ).value;
+
+
+        const office =
+            document.getElementById(
+                "officeFilter"
+            ).value;
+
+
+        let filtered =
+            complaints.filter(
+                complaint => {
+
+                    const complaintNumber =
+                        String(
+                            complaint.complaint_number ||
+                            ""
+                        ).toLowerCase();
+
+
+                    const resident =
+                        String(
+                            complaint.user_name ||
+                            complaint.name ||
+                            ""
+                        ).toLowerCase();
+
+
+                    const area =
+                        String(
+                            complaint.area ||
+                            ""
+                        ).toLowerCase();
+
+
+                    const landmark =
+                        String(
+                            complaint.landmark ||
+                            ""
+                        ).toLowerCase();
+
+
+                    const description =
+                        String(
+                            complaint.description ||
+                            ""
+                        ).toLowerCase();
+
+
+                    const searchMatch =
+                        !search ||
+                        complaintNumber.includes(search) ||
+                        resident.includes(search) ||
+                        area.includes(search) ||
+                        landmark.includes(search) ||
+                        description.includes(search);
+
+
+                    const statusMatch =
+                        !status ||
+                        complaint.status === status;
+
+
+                    const categoryMatch =
+                        !category ||
+                        complaint.category === category;
+
+
+                    const officeMatch =
+                        !office ||
+                        String(
+                            complaint.office_id || ""
+                        ) === String(office);
+
+
+                    return (
+                        searchMatch &&
+                        statusMatch &&
+                        categoryMatch &&
+                        officeMatch
+                    );
+
+                }
+            );
+
+
+        filtered.sort(
+            (a, b) => {
+
+                return new Date(
+                    b.created_at
+                ) - new Date(
+                    a.created_at
+                );
+
+            }
+        );
+
+
+        renderComplaints(
+            filtered
+        );
+
+    }
+
+
+    /*
+     * RENDER COMPLAINTS
+     */
+
+    function renderComplaints(
+        list
+    ) {
+
+        const container =
+            document.getElementById(
+                "complaintsContainer"
+            );
+
+
+        if (list.length === 0) {
+
+            container.innerHTML = `
+                <div class="empty">
+
+                    <h3>
+                        No complaints found
+                    </h3>
+
+                    <p>
+                        Try changing the search or filters.
+                    </p>
+
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        container.innerHTML =
+            list.map(
+                complaint =>
+                    createComplaintCard(
+                        complaint
+                    )
+            ).join("");
+
+    }
+
+
+    /*
+     * COMPLAINT CARD
+     */
+
+    function createComplaintCard(
+        complaint
+    ) {
+
+        const statusClass =
+            getStatusClass(
+                complaint.status
+            );
+
+
+        const severityClass =
+            String(
+                complaint.severity ||
+                ""
+            ).toLowerCase();
+
+
+        const office =
+            complaint.office_id
+                ? officeMap[
+                    String(
+                        complaint.office_id
+                    )
+                ]
+                : null;
+
+
+        let officeHtml;
+
+
+        if (office) {
+
+            officeHtml = `
+                <div class="office">
+
+                    <strong>
+                        🏛 Assigned Office:
+                    </strong>
+
+                    ${escapeHtml(
+                        office.name
+                    )}
+
+                    <br>
+
+                    <small>
+                        ${escapeHtml(
+                            office.office_type ||
+                            ""
+                        )}
+
+                        ${
+                            office.contact_phone
+                                ? " · " +
+                                  escapeHtml(
+                                      office.contact_phone
+                                  )
+                                : ""
+                        }
+                    </small>
+
+                </div>
+            `;
+
+        } else {
+
+            officeHtml = `
+                <div class="office not-assigned">
+
+                    <strong>
+                        ⚠ Not Assigned
+                    </strong>
+
+                    <br>
+
+                    <small>
+                        This complaint has not been assigned to an office yet.
+                    </small>
+
+                </div>
+            `;
+
+        }
+
+
+        return `
+
+            <div class="complaint-card">
+
+                <div class="complaint-header">
+
+                    <div>
+
+                        <div class="complaint-number">
+
+                            ${escapeHtml(
+                                complaint.complaint_number ||
+                                "Complaint #" + complaint.id
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="badges">
+
+                        <span
+                            class="badge ${statusClass}"
+                        >
+                            ${escapeHtml(
+                                complaint.status ||
+                                "Unknown"
+                            )}
+                        </span>
+
+
+                        <span
+                            class="badge ${severityClass}"
+                        >
+                            ${escapeHtml(
+                                complaint.severity ||
+                                "Medium"
+                            )}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="details-grid">
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Resident
+                        </span>
+
+                        <span class="detail-value">
+                            ${escapeHtml(
+                                complaint.user_name ||
+                                complaint.name ||
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Mobile
+                        </span>
+
+                        <span class="detail-value">
+                            ${escapeHtml(
+                                complaint.user_mobile ||
+                                complaint.mobile ||
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Category
+                        </span>
+
+                        <span class="detail-value">
+                            ${escapeHtml(
+                                complaint.category ||
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Area
+                        </span>
+
+                        <span class="detail-value">
+                            ${escapeHtml(
+                                complaint.area ||
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Landmark
+                        </span>
+
+                        <span class="detail-value">
+                            ${escapeHtml(
+                                complaint.landmark ||
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Latitude
+                        </span>
+
+                        <span class="detail-value">
+                            ${escapeHtml(
+                                complaint.latitude ??
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Longitude
+                        </span>
+
+                        <span class="detail-value">
+                            ${escapeHtml(
+                                complaint.longitude ??
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Priority Score
+                        </span>
+
+                        <span class="detail-value">
+                            ${escapeHtml(
+                                complaint.priority_score ??
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="description">
+
+                    <strong>
+                        Description:
+                    </strong>
+
+                    <br>
+
+                    ${escapeHtml(
+                        complaint.description ||
+                        "No description provided."
+                    )}
+
+                </div>
+
+
+                ${officeHtml}
+
+
+                <div class="complaint-footer">
+
+                    <div class="date">
+
+                        Created:
+                        ${formatDate(
+                            complaint.created_at
+                        )}
+
+                        ${
+                            complaint.updated_at
+                                ? `
+                                    <br>
+                                    Updated:
+                                    ${formatDate(
+                                        complaint.updated_at
+                                    )}
+                                  `
+                                : ""
+                        }
+
+                    </div>
+
+
+                    <a
+                        class="view-btn"
+                        href="complaint-details.html?id=${encodeURIComponent(
+                            complaint.id
+                        )}"
+                    >
+                        View / Manage →
+                    </a>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /*
+     * STATUS CSS CLASS
+     */
+
+    function getStatusClass(
+        status
+    ) {
+
+        switch (status) {
+
+            case "Pending":
+                return "pending";
+
+            case "Forwarded":
+                return "forwarded";
+
+            case "In Progress":
+                return "in-progress";
+
+            case "Resolved":
+                return "resolved";
+
+            default:
+                return "pending";
+
+        }
+
+    }
+
+
+    /*
+     * DATE FORMAT
+     */
+
+    function formatDate(
+        value
+    ) {
+
+        if (!value) {
+            return "-";
+        }
+
+
+        const date =
+            new Date(value);
+
+
+        if (Number.isNaN(
+            date.getTime()
+        )) {
+
+            return "-";
+
+        }
+
+
+        return date.toLocaleString(
+            "en-IN",
+            {
+                dateStyle: "medium",
+                timeStyle: "short"
+            }
+        );
+
+    }
+
+
+    /*
+     * ESCAPE HTML
+     */
+
+    function escapeHtml(
+        value
+    ) {
+
+        return String(
+            value ?? ""
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    /*
+     * MESSAGE
+     */
+
+    function showMessage(
+        message,
+        type
+    ) {
+
+        const element =
+            document.getElementById(
+                "message"
+            );
+
+
+        element.textContent =
+            message;
+
+
+        element.className =
+            "message " + type;
+
+    }
+
+
+    /*
+     * CLEAR FILTERS
+     */
+
+    function clearFilters() {
+
+        document.getElementById(
+            "searchInput"
+        ).value = "";
+
+
+        document.getElementById(
+            "statusFilter"
+        ).value = "";
+
+
+        document.getElementById(
+            "categoryFilter"
+        ).value = "";
+
+
+        document.getElementById(
+            "officeFilter"
+        ).value = "";
+
+
+        applyFilters();
+
+    }
+
+
+    /*
+     * LOGOUT
+     */
+
+    function logout() {
+
+        localStorage.removeItem(
+            "token"
+        );
+
+        localStorage.removeItem(
+            "user"
+        );
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    /*
+     * START
+     */
+
+    loadComplaints();
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Home - Village Connect</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7ed;
+            color: #26351f;
+            min-height: 100vh;
+        }
+
+        nav {
+            background: #31572c;
+            color: white;
+            padding: 16px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            width: 86%;
+            max-width: 1200px;
+            margin: 35px auto;
+        }
+
+        .welcome {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .welcome h1 {
+            color: #31572c;
+            margin-bottom: 10px;
+        }
+
+        .welcome p {
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .village-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #31572c;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            text-decoration: none;
+            color: #26351f;
+            transition: 0.2s;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .icon {
+            font-size: 35px;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            color: #31572c;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .logout-card {
+            cursor: pointer;
+        }
+
+        /* ADMIN CARDS */
+        .admin-card {
+            border: 2px solid #d5e5cd;
+        }
+
+        .admin-card h3 {
+            color: #1e5631;
+        }
+
+        .admin-label {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 5px 10px;
+            background: #e5f1e6;
+            color: #31572c;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+        }
+
+        .error {
+            background: #ffe5e5;
+            color: #a40000;
+        }
+
+        @media (max-width: 600px) {
+            nav {
+                padding: 15px 5%;
+                flex-wrap: wrap;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            nav a {
+                margin-left: 10px;
+                font-size: 14px;
+            }
+
+            .container {
+                width: 92%;
+                margin: 25px auto;
+            }
+
+            .welcome {
+                padding: 22px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="logo">
+            🌱 Village Connect
+        </div>
+
+        <div>
+            <a href="/index.html">Home</a>
+            <a href="/profile.html">Profile</a>
+            <a href="#" id="logoutLink">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div class="welcome">
+
+            <h1>
+                Welcome, <span id="userName">Resident</span>!
+            </h1>
+
+            <p>
+                Welcome to your Village Connect community dashboard.
+            </p>
+
+            <p>
+                Your registered village:
+            </p>
+
+            <div class="village-name" id="villageName">
+                Loading village...
+            </div>
+
+        </div>
+
+        <div class="cards">
+
+            <!-- 1. Report Complaint -->
+            <a href="/report.html" class="card">
+                <div class="icon">📝</div>
+                <h3>Report Complaint</h3>
+                <p>
+                    Report road, drainage, garbage, waterlogging
+                    and other village issues.
+                </p>
+            </a>
+
+            <!-- 2. My Complaints -->
+            <a href="/complaints.html" class="card">
+                <div class="icon">📋</div>
+                <h3>My Complaints</h3>
+                <p>
+                    View and track the complaints you have submitted.
+                </p>
+            </a>
+
+            <!-- 3. Complaint Map -->
+            <a href="/map.html" class="card">
+                <div class="icon">🗺️</div>
+                <h3>Complaint Map</h3>
+                <p>
+                    View reported complaints and their locations
+                    on the village map.
+                </p>
+            </a>
+
+            <!-- 4. Community Chat -->
+            <a href="/chat.html" class="card">
+                <div class="icon">💬</div>
+                <h3>Community Chat</h3>
+                <p>
+                    Communicate with other residents of your village.
+                </p>
+            </a>
+
+            <!-- 5. Community Events -->
+            <a href="/events.html" class="card">
+                <div class="icon">📅</div>
+                <h3>Community Events</h3>
+                <p>
+                    View upcoming village events and activities.
+                </p>
+            </a>
+
+            <!-- 6. Community Polls -->
+            <a href="/polls.html" class="card">
+                <div class="icon">📊</div>
+                <h3>Community Polls</h3>
+                <p>
+                    Participate in polls and share your opinion
+                    about village development.
+                </p>
+            </a>
+
+            <!-- 7. Volunteer -->
+            <a href="/volunteers.html" class="card" id="volunteerCard">
+                <div class="icon">🤝</div>
+                <h3>Volunteer</h3>
+                <p id="volunteerDescription">
+                    Join community activities and contribute
+                    to village development.
+                </p>
+            </a>
+
+            <!-- 8. My Village -->
+            <a href="/villages.html" class="card">
+                <div class="icon">🏡</div>
+                <h3>My Village</h3>
+                <p>
+                    View information, residents and development
+                    details of your village.
+                </p>
+            </a>
+
+            <!-- 9. Analytics -->
+            <a href="/analytics.html" class="card" id="analyticsCard">
+                <div class="icon">📈</div>
+                <h3>Analytics</h3>
+                <p>
+                    View village complaint and development
+                    statistics.
+                </p>
+            </a>
+
+            <!-- 10. Admin Dashboard: admin only -->
+            <a
+                href="/admin/dashboard.html"
+                class="card admin-card"
+                id="dashboardCard"
+                style="display:none;"
+            >
+                <div class="icon">🖥️</div>
+                <h3>Dashboard</h3>
+                <p>
+                    Monitor complaints, view statistics and manage
+                    village services.
+                </p>
+                <span class="admin-label">ADMIN</span>
+            </a>
+
+            <!-- 11. Manage Users: admin only -->
+            <a
+                href="/admin/users.html"
+                class="card admin-card"
+                id="usersCard"
+                style="display:none;"
+            >
+                <div class="icon">👥</div>
+                <h3>Users</h3>
+                <p>
+                    View registered users and promote eligible
+                    residents to official accounts.
+                </p>
+                <span class="admin-label">ADMIN</span>
+            </a>
+
+            <!-- 12. Logout -->
+            <div class="card logout-card" id="logoutCard">
+                <div class="icon">🚪</div>
+                <h3>Logout</h3>
+                <p>
+                    Logout from your Village Connect account.
+                </p>
+            </div>
+
+        </div>
+
+        <div id="message" class="message"></div>
+
+    </div>
+
+    <script>
+
+        // CHECK LOGIN
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            window.location.href = "/login.html";
+        } else {
+            loadUser();
+        }
+
+
+        // LOAD LOGGED-IN USER
+
+        async function loadUser() {
+
+            try {
+
+                const response = await fetch("/api/auth/me", {
+                    method: "GET",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success || !data.user) {
+
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
+
+                    window.location.href = "/login.html";
+                    return;
+                }
+
+                const user = data.user;
+
+                // SAVE LATEST USER INFORMATION
+
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify(user)
+                );
+
+
+                // DISPLAY USER NAME
+
+                document.getElementById("userName").textContent =
+                    user.name || "Resident";
+
+
+                // DISPLAY VILLAGE NAME
+
+                document.getElementById("villageName").textContent =
+                    user.village_name ||
+                    user.village ||
+                    "Your registered village";
+
+
+                // VOLUNTEER CARD NAVIGATION
+
+                const volunteerCard =
+                    document.getElementById("volunteerCard");
+
+                const volunteerDescription =
+                    document.getElementById("volunteerDescription");
+
+                const userRole = String(user.role || "").toLowerCase();
+
+                if (userRole === "admin") {
+
+                    volunteerCard.href = "/admin/volunteers.html";
+
+                    volunteerDescription.textContent =
+                        "Manage volunteer applications from all villages.";
+
+                } else if (userRole === "official") {
+
+                    volunteerCard.href = "/admin/volunteers.html";
+
+                    volunteerDescription.textContent =
+                        "View and manage volunteer requests from your village.";
+
+                } else {
+
+                    volunteerCard.href = "/volunteers.html";
+
+                    volunteerDescription.textContent =
+                        "Join community activities and contribute to village development.";
+                }
+
+
+                // ADMIN DASHBOARD AND USERS CARDS
+
+                const dashboardCard =
+                    document.getElementById("dashboardCard");
+
+                const usersCard =
+                    document.getElementById("usersCard");
+
+                const analyticsCard =
+                    document.getElementById("analyticsCard");
+
+                if (userRole === "admin") {
+
+                    dashboardCard.style.display = "block";
+                    usersCard.style.display = "block";
+
+                    // Admin opens Admin Analytics
+                    analyticsCard.href = "/admin/analytics.html";
+
+                } else {
+
+                    dashboardCard.style.display = "none";
+                    usersCard.style.display = "none";
+
+                    // Residents and officials open regular Analytics
+                    analyticsCard.href = "/analytics.html";
+                }
+
+            } catch (error) {
+
+                console.error("Unable to load user:", error);
+
+                showMessage(
+                    "Unable to connect to the server. Please make sure the backend is running.",
+                    "error"
+                );
+
+            }
+        }
+
+
+        // LOGOUT
+
+        function logout() {
+
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+
+            window.location.href = "/login.html";
+        }
+
+
+        document
+            .getElementById("logoutLink")
+            .addEventListener("click", function (event) {
+
+                event.preventDefault();
+                logout();
+
+            });
+
+
+        document
+            .getElementById("logoutCard")
+            .addEventListener("click", function () {
+
+                logout();
+
+            });
+
+
+        // MESSAGE
+
+        function showMessage(text, type) {
+
+            const message =
+                document.getElementById("message");
+
+            message.textContent = text;
+
+            message.className =
+                "message " + type;
+
+            message.style.display = "block";
+        }
+
+    </script>
+
+</body>
+</html>

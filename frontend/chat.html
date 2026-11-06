@@ -1,0 +1,891 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Village Chat - Village Connect</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7ed;
+            color: #26351f;
+        }
+
+        nav {
+            background: #31572c;
+            color: white;
+            padding: 16px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 18px;
+        }
+
+        .logo {
+            font-size: 23px;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+            padding: 25px 15px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .header h1 {
+            color: #31572c;
+            margin-bottom: 8px;
+        }
+
+        .officials-title {
+            margin-top: 20px;
+            margin-bottom: 12px;
+            font-size: 17px;
+            color: #31572c;
+        }
+
+        .officials-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .official-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e2eadc;
+        }
+
+        .official-role {
+            font-size: 13px;
+            font-weight: bold;
+            color: #31572c;
+            margin-bottom: 8px;
+        }
+
+        .official-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #26351f;
+            margin-bottom: 7px;
+        }
+
+        .official-status {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .official-status.registered,
+        .official-status.active {
+            background: #dff1d8;
+            color: #2f6b28;
+        }
+
+        .official-status.not-registered {
+            background: #f1eeee;
+            color: #777;
+        }
+
+        .official-status.active,
+        .official-status.inactive {
+            margin-left: 4px;
+        }
+
+        .official-status.inactive {
+            background: #fbe0e0;
+            color: #9b3333;
+        }
+
+        .official-contact {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #777;
+            word-break: break-word;
+        }
+
+        .village-selector {
+            margin-top: 18px;
+            display: none;
+        }
+
+        .village-selector label {
+            display: block;
+            font-weight: bold;
+            color: #31572c;
+            margin-bottom: 8px;
+        }
+
+        .village-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+        }
+
+        .chat-box {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            height: 500px;
+            overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .message {
+            max-width: 75%;
+            background: #eef5e8;
+            padding: 10px 13px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .message.mine {
+            margin-left: auto;
+            background: #d5ebcd;
+        }
+
+        .message-name {
+            font-weight: bold;
+            color: #31572c;
+            margin-bottom: 4px;
+        }
+
+        .message-text {
+            word-wrap: break-word;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #777;
+            margin-top: 5px;
+        }
+
+        .delete-btn {
+            border: none;
+            background: transparent;
+            color: #a33;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .form input {
+            flex: 1;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .form button {
+            padding: 13px 22px;
+            background: #31572c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            color: #777;
+            margin-top: 200px;
+        }
+
+        @media(max-width:700px) {
+            .officials-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(max-width:600px) {
+            nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .form {
+                flex-direction: column;
+            }
+
+            .form button {
+                width: 100%;
+            }
+
+            .officials-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav>
+    <div class="logo">🌱 Village Connect</div>
+
+    <div>
+        <a href="/home.html">Home</a>
+        <a href="/map.html">Map</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="header">
+        <h1>💬 Village Community Chat</h1>
+
+        <p id="chatDescription">
+            Chat with people from your registered village.
+        </p>
+
+        <p style="margin-top:8px;">
+            <strong>🏡 Village:</strong>
+            <span id="villageName">Loading...</span>
+        </p>
+
+        <div class="village-selector" id="villageSelector">
+            <label for="villageSelect">
+                Select a village to view its community chat
+            </label>
+
+            <select id="villageSelect">
+                <option value="">Loading villages...</option>
+            </select>
+        </div>
+    </div>
+
+    <section id="officialsSection">
+        <h3 class="officials-title">Village Officials</h3>
+
+        <div id="officialsGrid" class="officials-grid">
+            <div class="official-card">
+                <div class="official-role">Sarpanch</div>
+                <div class="official-name">Checking...</div>
+            </div>
+
+            <div class="official-card">
+                <div class="official-role">MPP</div>
+                <div class="official-name">Checking...</div>
+            </div>
+
+            <div class="official-card">
+                <div class="official-role">ZPH</div>
+                <div class="official-name">Checking...</div>
+            </div>
+
+            <div class="official-card">
+                <div class="official-role">VRO</div>
+                <div class="official-name">Checking...</div>
+            </div>
+        </div>
+    </section>
+
+    <div id="chatBox" class="chat-box">
+        <div class="empty">Loading messages...</div>
+    </div>
+
+    <form id="messageForm" class="form">
+        <input
+            type="text"
+            id="messageInput"
+            placeholder="Type your message..."
+            maxlength="1000"
+            required
+        >
+
+        <button type="submit">Send</button>
+    </form>
+
+</div>
+
+<script>
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+
+    if (!token || !storedUser) {
+        window.location.href = "/login.html";
+    }
+
+    let user;
+
+    try {
+        user = JSON.parse(storedUser);
+
+        if (!user || typeof user !== "object") {
+            throw new Error("Invalid user information.");
+        }
+    } catch (error) {
+        localStorage.clear();
+        window.location.href = "/login.html";
+    }
+
+    // Only Admin can view all villages.
+    // Sarpanch and all other users are village-scoped.
+    const role = String(user.role || "").toLowerCase();
+    const isAdmin = role === "admin";
+
+    const chatBox = document.getElementById("chatBox");
+    const messageForm = document.getElementById("messageForm");
+    const messageInput = document.getElementById("messageInput");
+    const villageName = document.getElementById("villageName");
+    const officialsGrid = document.getElementById("officialsGrid");
+    const officialsSection = document.getElementById("officialsSection");
+    const villageSelector = document.getElementById("villageSelector");
+    const villageSelect = document.getElementById("villageSelect");
+
+    let villageId = Number(user.village_id) || null;
+    let selectedVillageId = null;
+    let villages = [];
+
+    let villageDetailsLoaded = false;
+    let isLoadingMessages = false;
+
+    /*
+    |--------------------------------------------------------------------------
+    | API helper
+    |--------------------------------------------------------------------------
+    */
+
+    async function apiRequest(url, options = {}) {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                ...(options.headers || {}),
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        let data;
+
+        try {
+            data = await response.json();
+        } catch (error) {
+            throw new Error("Invalid server response.");
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to complete request."
+            );
+        }
+
+        return data;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Escape HTML
+    |--------------------------------------------------------------------------
+    */
+
+    function escapeHtml(value) {
+        const div = document.createElement("div");
+        div.textContent = value == null ? "" : String(value);
+        return div.innerHTML;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Load all villages for Admin only
+    |--------------------------------------------------------------------------
+    */
+
+    async function loadAllVillages() {
+        villageSelector.style.display = "block";
+        officialsSection.style.display = "none";
+
+        villageName.textContent = "All Villages";
+
+        chatDescription.textContent =
+            "Select any registered village to view its community chat.";
+
+        messageForm.style.display = "none";
+
+        try {
+            const data = await apiRequest("/api/chat");
+
+            villages = data.villages || [];
+
+            if (villages.length === 0) {
+                villageSelect.innerHTML =
+                    '<option value="">No villages registered</option>';
+
+                chatBox.innerHTML =
+                    '<div class="empty">No villages are available.</div>';
+
+                return;
+            }
+
+            villageSelect.innerHTML =
+                '<option value="">-- Select Village --</option>' +
+                villages.map(village => `
+                    <option value="${Number(village.id)}">
+                        ${escapeHtml(village.name)}
+                    </option>
+                `).join("");
+
+            chatBox.innerHTML =
+                '<div class="empty">Please select a village to view its messages.</div>';
+
+        } catch (error) {
+            console.error("Village loading error:", error);
+
+            villageSelect.innerHTML =
+                '<option value="">Unable to load villages</option>';
+
+            chatBox.innerHTML = `
+                <div class="empty">
+                    ${escapeHtml(error.message)}
+                </div>
+            `;
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Select village for Admin
+    |--------------------------------------------------------------------------
+    */
+
+    villageSelect.addEventListener("change", async function() {
+        const id = Number(this.value);
+
+        if (!id) {
+            selectedVillageId = null;
+            villageName.textContent = "All Villages";
+
+            chatBox.innerHTML =
+                '<div class="empty">Please select a village to view its messages.</div>';
+
+            messageForm.style.display = "none";
+            return;
+        }
+
+        selectedVillageId = id;
+
+        const selectedVillage = villages.find(
+            village => Number(village.id) === id
+        );
+
+        villageName.textContent =
+            selectedVillage ? selectedVillage.name : "Selected Village";
+
+        messageForm.style.display = "flex";
+
+        await loadMessages();
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Load village name
+    |--------------------------------------------------------------------------
+    */
+
+    async function loadVillageName() {
+        if (!villageId) return;
+
+        try {
+            const data = await apiRequest(
+                `/api/villages/${villageId}`
+            );
+
+            if (data.success && data.village) {
+                villageName.textContent = data.village.name;
+            } else {
+                villageName.textContent =
+                    user.village_name ||
+                    user.village ||
+                    "Your registered village";
+            }
+        } catch (error) {
+            console.error("Village loading error:", error);
+
+            villageName.textContent =
+                user.village_name ||
+                user.village ||
+                "Your registered village";
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Load Village Officials
+    |--------------------------------------------------------------------------
+    */
+
+    async function loadOfficials() {
+        if (!villageId) return;
+
+        try {
+            const data = await apiRequest(
+                "/api/villages/officials"
+            );
+
+            if (!data.success) {
+                throw new Error(
+                    data.message || "Unable to load officials."
+                );
+            }
+
+            const officials = data.officials || {};
+
+            const roles = [
+                "Sarpanch",
+                "MPP",
+                "ZPH",
+                "VRO"
+            ];
+
+            officialsGrid.innerHTML = roles.map(roleName => {
+                const official = officials[roleName];
+
+                if (!official || !official.registered) {
+                    return `
+                        <div class="official-card">
+                            <div class="official-role">
+                                ${escapeHtml(roleName)}
+                            </div>
+
+                            <div class="official-name">
+                                Not Registered
+                            </div>
+
+                            <span class="official-status not-registered">
+                                Not Registered
+                            </span>
+                        </div>
+                    `;
+                }
+
+                const isActive =
+                    String(official.status || "").toLowerCase() === "active";
+
+                return `
+                    <div class="official-card">
+                        <div class="official-role">
+                            ${escapeHtml(roleName)}
+                        </div>
+
+                        <div class="official-name">
+                            ${escapeHtml(official.name || "Official")}
+                        </div>
+
+                        <span class="official-status registered">
+                            Registered
+                        </span>
+
+                        <span class="official-status ${
+                            isActive ? "active" : "inactive"
+                        }">
+                            ${isActive ? "Active" : "Inactive"}
+                        </span>
+
+                        ${
+                            official.mobile
+                                ? `
+                                    <div class="official-contact">
+                                        📞 ${escapeHtml(official.mobile)}
+                                    </div>
+                                `
+                                : ""
+                        }
+                    </div>
+                `;
+            }).join("");
+
+        } catch (error) {
+            console.error("Officials loading error:", error);
+
+            officialsGrid.innerHTML = `
+                <div class="official-card">
+                    <div class="official-role">Village Officials</div>
+                    <div class="official-name">
+                        Unable to load officials.
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Load Chat Messages
+    |--------------------------------------------------------------------------
+    */
+
+    async function loadMessages() {
+        // Prevent overlapping refresh requests.
+        if (isLoadingMessages) return;
+
+        let url = "/api/chat";
+
+        if (isAdmin) {
+            if (!selectedVillageId) return;
+
+            url += `?village_id=${encodeURIComponent(selectedVillageId)}`;
+        }
+
+        isLoadingMessages = true;
+
+        try {
+            const data = await apiRequest(url);
+
+            if (!data.success) {
+                throw new Error(
+                    data.message || "Unable to load chat."
+                );
+            }
+
+            /*
+             * For non-admin users, the backend identifies
+             * their village using their authenticated account.
+             *
+             * This also works when user.village_id is missing
+             * from localStorage.
+             */
+            if (!isAdmin && data.village_id) {
+                const returnedVillageId = Number(data.village_id);
+
+                if (returnedVillageId && returnedVillageId !== villageId) {
+                    villageId = returnedVillageId;
+                    villageDetailsLoaded = false;
+                }
+
+                if (!villageDetailsLoaded && villageId) {
+                    villageDetailsLoaded = true;
+
+                    loadVillageName();
+                    loadOfficials();
+                }
+            }
+
+            const messages = data.messages || [];
+
+            if (messages.length === 0) {
+                chatBox.innerHTML = `
+                    <div class="empty">
+                        No messages yet.<br>
+                        Start the village conversation!
+                    </div>
+                `;
+                return;
+            }
+
+            chatBox.innerHTML = "";
+
+            messages.forEach(message => {
+                const div = document.createElement("div");
+
+                const isMine =
+                    Number(message.user_id) === Number(user.id);
+
+                div.className = "message" + (isMine ? " mine" : "");
+
+                const date = new Date(message.created_at);
+
+                div.innerHTML = `
+                    <div class="message-name">
+                        ${escapeHtml(message.user_name || "Village Member")}
+                    </div>
+
+                    <div class="message-text">
+                        ${escapeHtml(message.message)}
+                    </div>
+
+                    <div class="message-time">
+                        ${isNaN(date.getTime()) ? "" : date.toLocaleString()}
+                    </div>
+
+                    ${
+                        isMine
+                            ? `
+                                <button
+                                    class="delete-btn"
+                                    onclick="deleteMessage(${Number(message.id)})"
+                                >
+                                    Delete
+                                </button>
+                            `
+                            : ""
+                    }
+                `;
+
+                chatBox.appendChild(div);
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (error) {
+            console.error("Chat loading error:", error);
+
+            chatBox.innerHTML = `
+                <div class="empty">
+                    ${escapeHtml(error.message)}
+                </div>
+            `;
+
+        } finally {
+            isLoadingMessages = false;
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Send Message
+    |--------------------------------------------------------------------------
+    */
+
+    messageForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const message = messageInput.value.trim();
+
+        if (!message) return;
+
+        const body = { message };
+
+        // Only Admin must explicitly select a village.
+        // Other users' village is determined by the backend.
+        if (isAdmin) {
+            if (!selectedVillageId) {
+                alert("Please select a village first.");
+                return;
+            }
+
+            body.village_id = selectedVillageId;
+        }
+
+        try {
+            const data = await apiRequest("/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!data.success) {
+                throw new Error(
+                    data.message || "Unable to send message."
+                );
+            }
+
+            messageInput.value = "";
+
+            await loadMessages();
+
+        } catch (error) {
+            console.error("Send message error:", error);
+            alert(error.message);
+        }
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Own Message
+    |--------------------------------------------------------------------------
+    */
+
+    async function deleteMessage(id) {
+        if (!confirm("Delete this message?")) {
+            return;
+        }
+
+        try {
+            await apiRequest(`/api/chat/${id}`, {
+                method: "DELETE"
+            });
+
+            await loadMessages();
+
+        } catch (error) {
+            console.error("Delete message error:", error);
+            alert(error.message);
+        }
+    }
+
+    window.deleteMessage = deleteMessage;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Initial Loading
+    |--------------------------------------------------------------------------
+    */
+
+    if (isAdmin) {
+        // Admin can select and view all villages.
+        loadAllVillages();
+
+    } else {
+        // All non-admin users see only their own village.
+        villageSelector.style.display = "none";
+        officialsSection.style.display = "block";
+        messageForm.style.display = "flex";
+
+        chatDescription.textContent =
+            "Chat with people from your registered village.";
+
+        if (villageId) {
+            loadVillageName();
+            loadOfficials();
+        } else {
+            villageName.textContent = "Loading your village...";
+        }
+
+        // The backend can determine the user's village
+        // even if villageId is missing from localStorage.
+        loadMessages();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Refresh Messages Every 3 Seconds
+    |--------------------------------------------------------------------------
+    */
+
+    setInterval(function() {
+        if (isAdmin && !selectedVillageId) return;
+
+        loadMessages();
+    }, 3000);
+
+</script>
+
+</body>
+</html>
