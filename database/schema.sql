@@ -1,7 +1,4 @@
-CREATE DATABASE IF NOT EXISTS village_connect;
-
-USE village_connect;
-
+USE railway;
 -- =========================================================
 -- 1. VILLAGES
 -- =========================================================
