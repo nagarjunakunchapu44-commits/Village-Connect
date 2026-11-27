@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Village Connect - Admin Analytics</title>
+    <title>Village Connect - Complaint Analytics & Management</title>
 
     <style>
         * {
@@ -336,6 +336,79 @@
                 padding: 17px;
             }
         }
+
+        .complaint-manage-cell { min-width: 220px; }
+        .manage-complaint-btn, .save-status-btn, .cancel-status-btn {
+            border: 0; border-radius: 6px; padding: 8px 11px;
+            cursor: pointer; font-weight: 600; margin: 2px;
+        }
+        .manage-complaint-btn, .save-status-btn { background: #166534; color: #fff; }
+        .cancel-status-btn { background: #e2e8f0; color: #334155; }
+        .complaint-status-editor { min-width: 190px; margin-top: 8px; }
+        .complaint-status-editor select, .complaint-status-editor input {
+            width: 100%; padding: 8px; margin: 3px 0;
+            border: 1px solid #cbd5e1; border-radius: 5px; background: #fff;
+        }
+        .complaint-status-editor button { margin-top: 4px; }
+        @media (max-width: 700px) {
+            .admin-table { min-width: 760px; }
+        }
+
+        .view-complaint-btn {
+            border: 0; border-radius: 6px; padding: 8px 11px;
+            cursor: pointer; font-weight: 600; margin: 2px;
+            background: #1d4ed8; color: #fff;
+        }
+        .complaint-view-modal {
+            position: fixed; inset: 0; z-index: 9999;
+            display: none; align-items: center; justify-content: center;
+            padding: 18px; background: rgba(15, 23, 42, .72);
+        }
+        .complaint-view-modal.open { display: flex; }
+        .complaint-view-dialog {
+            width: min(850px, 100%); max-height: 90vh; overflow-y: auto;
+            background: #fff; border-radius: 14px; padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.25);
+        }
+        .complaint-view-header {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; margin-bottom: 18px;
+        }
+        .complaint-view-header h2 { margin: 0; color: #14532d; }
+        .close-complaint-view {
+            border: 0; border-radius: 7px; padding: 8px 13px;
+            background: #e2e8f0; color: #1e293b; cursor: pointer;
+            font-size: 18px; font-weight: bold;
+        }
+        .complaint-view-details {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px; margin-bottom: 18px;
+        }
+        .complaint-view-detail {
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 11px;
+            overflow-wrap: anywhere;
+        }
+        .complaint-view-detail strong { display: block; color: #475569; margin-bottom: 5px; }
+        .complaint-view-description {
+            white-space: pre-wrap; line-height: 1.6; margin: 12px 0 20px;
+            padding: 14px; background: #f8fafc; border-radius: 8px;
+        }
+        .complaint-photo-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px; margin-top: 12px;
+        }
+        .complaint-photo-card { margin: 0; }
+        .complaint-photo-card img {
+            width: 100%; height: 230px; object-fit: contain;
+            background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 9px;
+        }
+        .complaint-photo-card figcaption { color: #64748b; font-size: 13px; margin-top: 6px; }
+        .no-complaint-photo { padding: 18px; background: #f8fafc; color: #64748b; border-radius: 8px; }
+        @media (max-width: 520px) {
+            .complaint-view-dialog { padding: 16px; }
+            .complaint-photo-card img { height: 190px; }
+        }
     </style>
 </head>
 
@@ -487,12 +560,13 @@
                             <th>Status</th>
                             <th>Severity</th>
                             <th>Date</th>
+                            <th>Manage</th>
                         </tr>
                     </thead>
 
                     <tbody id="recentComplaints">
                         <tr>
-                            <td colspan="5">Loading...</td>
+                            <td colspan="6">Loading...</td>
                         </tr>
                     </tbody>
 
@@ -514,7 +588,7 @@
 
         <div>
             <strong>Village Connect</strong>
-            <p>Admin analytics and community management.</p>
+            <p>Village analytics and complaint status management.</p>
         </div>
 
         <div class="footer-bottom">
@@ -522,6 +596,20 @@
         </div>
 
     </footer>
+
+    <!-- COMPLAINT DETAILS / PHOTO VIEWER -->
+    <div id="complaintViewModal" class="complaint-view-modal"
+         role="dialog" aria-modal="true" aria-labelledby="complaintViewTitle"
+         onclick="handleComplaintModalBackdrop(event)">
+        <section class="complaint-view-dialog">
+            <div class="complaint-view-header">
+                <h2 id="complaintViewTitle">Complaint Details</h2>
+                <button type="button" class="close-complaint-view"
+                        onclick="closeComplaintView()" aria-label="Close">×</button>
+            </div>
+            <div id="complaintViewContent"></div>
+        </section>
+    </div>
 
     <!-- JAVASCRIPT -->
 
@@ -557,13 +645,15 @@
            API HELPER
         ===================================== */
 
-        async function fetchAPI(url) {
+        async function fetchAPI(url, options = {}) {
 
             const response = await fetch(`${API_URL}${url}`, {
-                method: "GET",
+                ...options,
+                method: options.method || "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    ...(options.headers || {})
                 }
             });
 
@@ -604,16 +694,21 @@
 
                 currentUser = response.user;
 
-                if (
-                    !currentUser ||
-                    String(currentUser.role || "").toLowerCase() !== "admin"
-                ) {
+                const role = String(currentUser?.role || "").toLowerCase();
+
+                if (!currentUser || !["admin", "official"].includes(role)) {
                     window.location.href = "../home.html";
                     return false;
                 }
 
-                // Admin can access every village.
-                // Do not check currentUser.village_id.
+                // Admins can choose any village. Officials are limited by the
+                // backend to their registered village and receive one village.
+                document.body.dataset.userRole = role;
+                const selectorSection = villageSelect.closest(".analytics-village-selector");
+                if (selectorSection) {
+                    const label = selectorSection.querySelector("label");
+                    if (label && role === "official") label.textContent = "Your Village";
+                }
 
                 return true;
 
@@ -735,18 +830,22 @@
                 villageSelect.innerHTML =
                     '<option value="">Loading villages...</option>';
 
+                const isAdminUser = String(currentUser?.role || "").toLowerCase() === "admin";
+
                 const [
                     complaintsResult,
                     villagesResult,
                     eventsResult,
                     volunteersResult
                 ] = await Promise.all([
-
                     fetchAPI("/complaints/all"),
                     fetchAPI("/villages"),
                     fetchAPI("/events"),
-                    fetchAPI("/volunteers")
-
+                    // Volunteer analytics are admin-wide. Some official roles
+                    // are intentionally not permitted to view volunteer records.
+                    isAdminUser
+                        ? fetchAPI("/volunteers")
+                        : Promise.resolve({ volunteers: [] })
                 ]);
 
                 allComplaints =
@@ -808,9 +907,11 @@
                 `).join("")}
             `;
 
-            villageSelect.disabled = false;
+            const isOfficial = String(currentUser?.role || "").toLowerCase() === "official";
+            villageSelect.disabled = isOfficial || allVillages.length <= 1;
 
-            // Automatically select the first village.
+            // Automatically select the first village. Officials only receive
+            // their own village from the API.
 
             if (allVillages.length > 0) {
 
@@ -870,7 +971,7 @@
 
             document.getElementById("recentComplaints").innerHTML = `
                 <tr>
-                    <td colspan="5">Select a village.</td>
+                    <td colspan="6">Select a village.</td>
                 </tr>
             `;
         }
@@ -1123,7 +1224,7 @@
 
                 recentContainer.innerHTML = `
                     <tr>
-                        <td colspan="5">
+                        <td colspan="6">
                             No complaints available for this village.
                         </td>
                     </tr>
@@ -1167,9 +1268,171 @@
                         }
                     </td>
 
+                    <td class="complaint-manage-cell">
+                        <button type="button"
+                            class="view-complaint-btn"
+                            onclick="viewComplaint(${Number(complaint.id)})">
+                            View
+                        </button>
+                        <button type="button"
+                            class="manage-complaint-btn"
+                            onclick="openComplaintManager(${Number(complaint.id)})">
+                            Manage
+                        </button>
+                        <div id="manage-${Number(complaint.id)}" class="complaint-status-editor" hidden>
+                            <select id="status-${Number(complaint.id)}" aria-label="New complaint status">
+                                ${["Pending", "Forwarded", "In Progress", "Resolved"].map(status => `
+                                    <option value="${status}" ${String(complaint.status) === status ? "selected" : ""}>${status}</option>
+                                `).join("")}
+                            </select>
+                            <input id="remark-${Number(complaint.id)}" type="text" maxlength="500"
+                                placeholder="Optional remark" aria-label="Status update remark">
+                            <button type="button" class="save-status-btn"
+                                onclick="saveComplaintStatus(${Number(complaint.id)})">Save</button>
+                            <button type="button" class="cancel-status-btn"
+                                onclick="closeComplaintManager(${Number(complaint.id)})">Cancel</button>
+                        </div>
+                    </td>
+
                 </tr>
 
             `).join("");
+        }
+
+        /* =====================================
+           VIEW COMPLAINT DETAILS AND REPORTED PHOTOS
+        ===================================== */
+
+        function complaintImagePath(imageUrl) {
+            const value = String(imageUrl || "").trim();
+            // Complaint uploads are served by this application from /uploads.
+            // Reject arbitrary protocols/paths before putting a URL in an img tag.
+            if (value.startsWith("/uploads/")) return value;
+            if (value.startsWith("uploads/")) return "/" + value;
+            return "";
+        }
+
+        function viewComplaint(complaintId) {
+            const complaint = allComplaints.find(
+                item => Number(item.id) === Number(complaintId)
+            );
+
+            if (!complaint) {
+                showMessage("Complaint not found. Please refresh analytics.");
+                return;
+            }
+
+            const images = Array.isArray(complaint.images) ? complaint.images : [];
+            const photoMarkup = images.length
+                ? `<div class="complaint-photo-grid">${images.map((image, index) => {
+                    const imagePath = complaintImagePath(image.image_url);
+                    if (!imagePath) return "";
+                    return `
+                        <figure class="complaint-photo-card">
+                            <a href="${escapeHTML(imagePath)}" target="_blank" rel="noopener noreferrer">
+                                <img src="${escapeHTML(imagePath)}"
+                                     alt="Photo ${index + 1} uploaded with complaint"
+                                     loading="lazy"
+                                     onerror="this.alt='Unable to load this uploaded photo'; this.style.display='none';">
+                            </a>
+                            <figcaption>Uploaded complaint photo ${index + 1} — click to open full size</figcaption>
+                        </figure>
+                    `;
+                }).join("")}</div>`
+                : `<div class="no-complaint-photo">No photo was uploaded with this complaint.</div>`;
+
+            const dateText = complaint.created_at
+                ? new Date(complaint.created_at).toLocaleString()
+                : "-";
+
+            document.getElementById("complaintViewContent").innerHTML = `
+                <div class="complaint-view-details">
+                    <div class="complaint-view-detail"><strong>Complaint Number</strong>${escapeHTML(complaint.complaint_number || complaint.id || "-")}</div>
+                    <div class="complaint-view-detail"><strong>Village</strong>${escapeHTML(complaint.village_name || "-")}</div>
+                    <div class="complaint-view-detail"><strong>Category</strong>${escapeHTML(complaint.category || "-")}</div>
+                    <div class="complaint-view-detail"><strong>Status</strong>${escapeHTML(complaint.status || "-")}</div>
+                    <div class="complaint-view-detail"><strong>Severity</strong>${escapeHTML(complaint.severity || "-")}</div>
+                    <div class="complaint-view-detail"><strong>Reported On</strong>${escapeHTML(dateText)}</div>
+                    <div class="complaint-view-detail"><strong>Area</strong>${escapeHTML(complaint.area || "-")}</div>
+                    <div class="complaint-view-detail"><strong>Landmark</strong>${escapeHTML(complaint.landmark || "-")}</div>
+                    <div class="complaint-view-detail"><strong>Reported By</strong>${escapeHTML(complaint.resident_name || "-")}</div>
+                </div>
+                <h3>Complaint Description</h3>
+                <div class="complaint-view-description">${escapeHTML(complaint.description || "No description provided.")}</div>
+                <h3>Photo uploaded during reporting</h3>
+                ${photoMarkup}
+            `;
+
+            const modal = document.getElementById("complaintViewModal");
+            modal.classList.add("open");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeComplaintView() {
+            const modal = document.getElementById("complaintViewModal");
+            if (modal) modal.classList.remove("open");
+            document.body.style.overflow = "";
+        }
+
+        function handleComplaintModalBackdrop(event) {
+            if (event.target && event.target.id === "complaintViewModal") {
+                closeComplaintView();
+            }
+        }
+
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Escape") closeComplaintView();
+        });
+
+        /* =====================================
+           COMPLAINT STATUS MANAGEMENT
+        ===================================== */
+
+        function openComplaintManager(complaintId) {
+            const editor = document.getElementById(`manage-${complaintId}`);
+            if (editor) editor.hidden = false;
+        }
+
+        function closeComplaintManager(complaintId) {
+            const editor = document.getElementById(`manage-${complaintId}`);
+            if (editor) editor.hidden = true;
+        }
+
+        async function saveComplaintStatus(complaintId) {
+            const statusElement = document.getElementById(`status-${complaintId}`);
+            const remarkElement = document.getElementById(`remark-${complaintId}`);
+            const newStatus = statusElement?.value;
+            const allowedStatuses = ["Pending", "Forwarded", "In Progress", "Resolved"];
+
+            if (!allowedStatuses.includes(newStatus)) {
+                showMessage("Please select a valid complaint status.");
+                return;
+            }
+
+            const complaint = allComplaints.find(item => Number(item.id) === Number(complaintId));
+            if (!complaint) {
+                showMessage("Complaint not found. Please refresh analytics.");
+                return;
+            }
+
+            try {
+                await fetchAPI(`/complaints/${encodeURIComponent(complaintId)}/status`, {
+                    method: "PUT",
+                    body: JSON.stringify({
+                        status: newStatus,
+                        remark: String(remarkElement?.value || "").trim()
+                    })
+                });
+
+                complaint.status = newStatus;
+                complaint.updated_at = new Date().toISOString();
+                closeComplaintManager(complaintId);
+                renderAnalytics();
+                showMessage(`Complaint ${complaint.complaint_number || complaintId} status updated to ${newStatus}.`, false);
+            } catch (error) {
+                console.error("Complaint status update error:", error);
+                showMessage(error.message || "Unable to update complaint status.");
+            }
         }
 
         /* =====================================

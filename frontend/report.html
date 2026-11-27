@@ -74,6 +74,24 @@
             padding: 10px;
         }
 
+        .required-note {
+            display: block;
+            margin-top: 7px;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        #photoPreview {
+            display: none;
+            margin-top: 12px;
+            max-width: 100%;
+            max-height: 260px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
         button {
             width: 100%;
             margin-top: 18px;
@@ -268,13 +286,19 @@
 
             <!-- PHOTO -->
 
-            <label for="photo">Problem Photo</label>
+            <label for="photo">Problem Photo <span style="color:#dc2626">*</span></label>
 
             <input
                 type="file"
                 id="photo"
+                name="photo"
                 accept="image/jpeg,image/png,image/webp"
+                required
             >
+            <small class="required-note">
+                A problem photo is compulsory. The app will add the GPS coordinates captured for this report to the photo's JPEG location metadata.
+            </small>
+            <img id="photoPreview" alt="Selected complaint photo preview">
 
             <!-- LOCATION -->
 
@@ -286,8 +310,11 @@
             </button>
 
             <div id="locationStatus">
-                Location not captured
+                GPS location not captured. Capturing a valid location is compulsory.
             </div>
+            <small class="required-note">
+                Both GPS coordinates and a photo are required before a complaint can be submitted.
+            </small>
 
             <!-- SUBMIT -->
 
@@ -308,6 +335,9 @@
         </a>
 
     </div>
+
+    <!-- Used to write the reporting GPS coordinates into JPEG EXIF metadata. -->
+    <script src="https://cdn.jsdelivr.net/npm/piexifjs@1.0.6/piexif.min.js"></script>
 
     <script>
         "use strict";
@@ -339,8 +369,133 @@
         const submitButton =
             document.getElementById("submitButton");
 
+        const photoInput = document.getElementById("photo");
+        const photoPreview = document.getElementById("photoPreview");
+
+        let previewObjectUrl = null;
+
         const message =
             document.getElementById("message");
+
+
+        /* =========================================
+           PHOTO PREVIEW
+        ========================================= */
+
+        photoInput.addEventListener("change", function () {
+            if (previewObjectUrl) {
+                URL.revokeObjectURL(previewObjectUrl);
+                previewObjectUrl = null;
+            }
+
+            const selectedFile = photoInput.files && photoInput.files[0];
+            if (!selectedFile) {
+                photoPreview.removeAttribute("src");
+                photoPreview.style.display = "none";
+                return;
+            }
+
+            if (!selectedFile.type.startsWith("image/")) {
+                photoInput.value = "";
+                photoPreview.style.display = "none";
+                showMessage("Please select a valid image file.", true);
+                return;
+            }
+
+            previewObjectUrl = URL.createObjectURL(selectedFile);
+            photoPreview.src = previewObjectUrl;
+            photoPreview.style.display = "block";
+        });
+
+
+        /* =========================================
+           EMBED REPORT GPS IN PHOTO EXIF
+        ========================================= */
+
+        function decimalToDms(value) {
+            const absolute = Math.abs(value);
+            const degrees = Math.floor(absolute);
+            const minutesFloat = (absolute - degrees) * 60;
+            const minutes = Math.floor(minutesFloat);
+            const seconds = (minutesFloat - minutes) * 60;
+
+            return [
+                [degrees, 1],
+                [minutes, 1],
+                [Math.round(seconds * 10000), 10000]
+            ];
+        }
+
+        async function createGeotaggedJpeg(file, lat, lng) {
+            if (!window.piexif) {
+                throw new Error("The photo geotagging library could not load. Check your internet connection and reload this page.");
+            }
+
+            let bitmap;
+            try {
+                bitmap = await createImageBitmap(file);
+            } catch (error) {
+                throw new Error("The selected photo could not be opened. Please choose a JPG, PNG or WEBP image.");
+            }
+
+            const maxDimension = 2560;
+            const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+            canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+
+            const context = canvas.getContext("2d", { alpha: false });
+            context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+            bitmap.close();
+
+            let jpegBlob = null;
+            for (const quality of [0.9, 0.82, 0.74, 0.66, 0.58]) {
+                jpegBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+                if (jpegBlob && jpegBlob.size <= 4.5 * 1024 * 1024) {
+                    break;
+                }
+            }
+
+            if (!jpegBlob || jpegBlob.size > 4.5 * 1024 * 1024) {
+                throw new Error("The photo could not be compressed below the 5 MB upload limit. Please choose a smaller photo.");
+            }
+
+            const jpegDataUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error("Could not read the selected photo."));
+                reader.readAsDataURL(jpegBlob);
+            });
+
+            const gpsIfd = {};
+            gpsIfd[piexif.GPSIFD.GPSVersionID] = [2, 3, 0, 0];
+            gpsIfd[piexif.GPSIFD.GPSLatitudeRef] = lat < 0 ? "S" : "N";
+            gpsIfd[piexif.GPSIFD.GPSLatitude] = decimalToDms(lat);
+            gpsIfd[piexif.GPSIFD.GPSLongitudeRef] = lng < 0 ? "W" : "E";
+            gpsIfd[piexif.GPSIFD.GPSLongitude] = decimalToDms(lng);
+
+            const exifBytes = piexif.dump({
+                "0th": {},
+                "Exif": {},
+                "GPS": gpsIfd,
+                "1st": {},
+                "thumbnail": null
+            });
+
+            const taggedDataUrl = piexif.insert(exifBytes, jpegDataUrl);
+            const response = await fetch(taggedDataUrl);
+            const taggedBlob = await response.blob();
+
+            if (taggedBlob.size > 5 * 1024 * 1024) {
+                throw new Error("The geotagged photo is larger than 5 MB. Please choose a smaller photo.");
+            }
+
+            return new File(
+                [taggedBlob],
+                `village-connect-geotagged-${Date.now()}.jpg`,
+                { type: "image/jpeg", lastModified: Date.now() }
+            );
+        }
 
 
         /* =========================================
@@ -426,7 +581,7 @@
                     locationStatus.style.color = "#166534";
 
                     locationStatus.textContent =
-                        `Location captured: ${latitude}, ${longitude}`;
+                        `GPS location captured successfully: ${latitude}, ${longitude}. This location will be embedded into your complaint photo.`;
 
                     locationButton.disabled = false;
                 },
@@ -511,6 +666,14 @@
                 return;
             }
 
+            /* CHECK REQUIRED PHOTO */
+
+            if (!photoInput.files || photoInput.files.length === 0) {
+                showMessage("Please upload a problem photo. A photo is mandatory for every complaint.", true);
+                photoInput.focus();
+                return;
+            }
+
             /* GET VALUES */
 
             const selectedCategory = category.value;
@@ -526,10 +689,6 @@
 
             const description =
                 document.getElementById("description").value.trim();
-
-            const photoInput =
-                document.getElementById("photo");
-
 
             /* VALIDATE OTHER PROBLEM */
 
@@ -582,26 +741,25 @@
             formData.append("longitude", longitude);
 
 
-            /* ADD PHOTO */
-
-            if (photoInput.files.length > 0) {
-
-                formData.append(
-                    "photo",
-                    photoInput.files[0]
-                );
-            }
-
-
-            /* SEND TO BACKEND */
+            /* ADD PHOTO WITH GPS EXIF METADATA */
 
             try {
-
                 submitButton.disabled = true;
+                submitButton.textContent = "Adding GPS to photo...";
+                showMessage("Preparing your photo and embedding the captured GPS location...");
 
-                submitButton.textContent = "Submitting...";
+                const geotaggedPhoto = await createGeotaggedJpeg(
+                    photoInput.files[0],
+                    latitude,
+                    longitude
+                );
 
-                showMessage("Submitting complaint...");
+                formData.append("photo", geotaggedPhoto, geotaggedPhoto.name);
+
+                /* SEND TO BACKEND */
+
+                submitButton.textContent = "Submitting complaint...";
+                showMessage("Submitting complaint with GPS-tagged photo...");
 
                 const response = await fetch(
                     "/api/complaints",
@@ -657,6 +815,13 @@
 
                 complaintForm.reset();
 
+                if (previewObjectUrl) {
+                    URL.revokeObjectURL(previewObjectUrl);
+                    previewObjectUrl = null;
+                }
+                photoPreview.removeAttribute("src");
+                photoPreview.style.display = "none";
+
                 latitude = null;
                 longitude = null;
 
@@ -667,7 +832,7 @@
                 locationStatus.style.color = "#166534";
 
                 locationStatus.textContent =
-                    "Location not captured";
+                    "GPS location not captured. Capturing a valid location is compulsory.";
 
             } catch (error) {
 

@@ -1,16 +1,16 @@
-
 const express = require("express");
 const router = express.Router();
 
 const eventController = require("../controllers/eventController");
 const authMiddleware = require("../middleware/authMiddleware");
+const { eventPollOrganizerMiddleware } = require("../middleware/eventPollPermissionMiddleware");
 
 // Get events belonging to the user's village
 // Admin can see all events
 router.get("/", authMiddleware, eventController.getEvents);
 
 // Create an event
-router.post("/", authMiddleware, eventController.createEvent);
+router.post("/", eventPollOrganizerMiddleware, eventController.createEvent);
 
 // Get one event by ID
 router.get("/:id", authMiddleware, eventController.getEventById);

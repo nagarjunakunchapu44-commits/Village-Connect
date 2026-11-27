@@ -15,7 +15,8 @@ const router = express.Router();
     Resident must be logged in.
 
     Photo:
-    Optional single image upload.
+    Mandatory single image upload. The controller also requires valid GPS
+    latitude and longitude before it creates the complaint.
 */
 router.post(
     "/",

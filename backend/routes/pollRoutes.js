@@ -1,10 +1,9 @@
-
 const express = require("express");
 
 const pollController = require("../controllers/pollController");
 const authMiddleware = require("../middleware/authMiddleware");
 const adminMiddleware = require("../middleware/adminMiddleware");
-const contentCreatorMiddleware = require("../middleware/contentCreatorMiddleware");
+const { eventPollOrganizerMiddleware } = require("../middleware/eventPollPermissionMiddleware");
 
 const router = express.Router();
 
@@ -26,7 +25,7 @@ router.get(
 // Admins, village officials, and approved volunteers
 router.post(
     "/",
-    contentCreatorMiddleware,
+    eventPollOrganizerMiddleware,
     pollController.createPoll
 );
 

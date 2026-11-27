@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -211,6 +210,19 @@
             color: #666;
         }
 
+        .create-toolbar { display:flex; justify-content:flex-end; margin-bottom:18px; }
+        .create-btn { background:#287a43; color:#fff; border:0; border-radius:7px; padding:12px 18px; cursor:pointer; font-weight:700; }
+        .create-panel { display:none; background:#fff; padding:20px; border-radius:10px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,.07); }
+        .create-panel.open { display:block; }
+        .create-panel h2 { margin-top:0; color:#234b35; }
+        .create-panel label { display:block; font-weight:600; margin:12px 0 5px; }
+        .create-panel input,.create-panel select { width:100%; padding:11px; border:1px solid #ccc; border-radius:6px; }
+        .option-row { display:flex; gap:8px; align-items:center; margin:8px 0; }
+        .option-row input { flex:1; }
+        .option-row button { flex:0 0 auto; background:#9b2c2c; padding:9px 12px; }
+        .create-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:15px; }
+        .secondary-btn { background:#64748b; }
+        .create-hint { color:#64748b; font-size:13px; }
         @media (max-width: 600px) {
             .container {
                 margin: 10px auto;
@@ -232,6 +244,33 @@
         </header>
 
         <div id="messageBox" class="message"></div>
+
+        <div class="create-toolbar" id="createPollToolbar" style="display:none;">
+            <button type="button" class="create-btn" id="showCreatePoll">+ Create Poll</button>
+        </div>
+
+        <section class="create-panel" id="createPollPanel">
+            <h2>Create a Village Poll</h2>
+            <form id="createPollForm">
+                <label for="newPollQuestion">Poll question *</label>
+                <input id="newPollQuestion" maxlength="500" required placeholder="Enter your question">
+                <div id="newPollOptions">
+                    <label>Answer options * (minimum 2)</label>
+                    <div class="option-row"><input class="new-poll-option" maxlength="180" required placeholder="Option 1"></div>
+                    <div class="option-row"><input class="new-poll-option" maxlength="180" required placeholder="Option 2"></div>
+                </div>
+                <button type="button" class="secondary-btn" id="addPollOption">+ Add option</button>
+                <div id="pollVillageWrap" style="display:none;">
+                    <label for="pollVillage">Village</label>
+                    <select id="pollVillage"><option value="">All villages</option></select>
+                </div>
+                <p class="create-hint" id="pollVillageHint">Village officials and approved volunteers can create polls only for their own village.</p>
+                <div class="create-actions">
+                    <button type="submit" class="create-btn" id="savePollButton">Create Poll</button>
+                    <button type="button" class="secondary-btn" id="cancelCreatePoll">Cancel</button>
+                </div>
+            </form>
+        </section>
 
         <div class="toolbar">
             <input
@@ -625,6 +664,80 @@
             }
         }
 
+
+        // ------------------------------------------------------------
+        // POLL CREATION: admins can select a village or All villages.
+        // Approved volunteers and officials are village-restricted by API.
+        // ------------------------------------------------------------
+        const createPollToolbar = document.getElementById("createPollToolbar");
+        const createPollPanel = document.getElementById("createPollPanel");
+        const createPollForm = document.getElementById("createPollForm");
+        const pollVillageWrap = document.getElementById("pollVillageWrap");
+        const pollVillageSelect = document.getElementById("pollVillage");
+        const newPollOptions = document.getElementById("newPollOptions");
+
+        async function setupPollCreator() {
+            try {
+                const meData = await apiRequest("/auth/me");
+                const user = meData.user || {};
+                const role = String(user.role || "").toLowerCase();
+                let allowed = role === "admin" || role === "official";
+                if (!allowed && role === "resident") {
+                    try {
+                        const volunteerData = await apiRequest("/volunteers");
+                        allowed = (volunteerData.volunteers || []).some(v => Number(v.approved) === 1);
+                    } catch (_) { allowed = false; }
+                }
+                if (!allowed) return;
+                createPollToolbar.style.display = "flex";
+                if (role === "admin") {
+                    pollVillageWrap.style.display = "block";
+                    const villageData = await apiRequest("/villages");
+                    (villageData.villages || []).forEach(v => {
+                        const option = document.createElement("option");
+                        option.value = v.id;
+                        option.textContent = v.name;
+                        pollVillageSelect.appendChild(option);
+                    });
+                } else {
+                    document.getElementById("pollVillageHint").textContent = "This poll will be created for your registered village.";
+                }
+            } catch (error) { console.warn("Could not check poll creation access:", error.message); }
+        }
+
+        document.getElementById("showCreatePoll").addEventListener("click", () => createPollPanel.classList.toggle("open"));
+        document.getElementById("cancelCreatePoll").addEventListener("click", () => { createPollPanel.classList.remove("open"); createPollForm.reset(); resetPollOptionFields(); });
+        document.getElementById("addPollOption").addEventListener("click", () => {
+            const count = newPollOptions.querySelectorAll(".new-poll-option").length;
+            if (count >= 10) return showMessage("A poll can have at most 10 options.", "error");
+            const row = document.createElement("div");
+            row.className = "option-row";
+            row.innerHTML = `<input class="new-poll-option" maxlength="180" required placeholder="Option ${count + 1}"><button type="button" aria-label="Remove option">Remove</button>`;
+            row.querySelector("button").addEventListener("click", () => row.remove());
+            newPollOptions.appendChild(row);
+        });
+        function resetPollOptionFields() {
+            newPollOptions.innerHTML = `<label>Answer options * (minimum 2)</label><div class="option-row"><input class="new-poll-option" maxlength="180" required placeholder="Option 1"></div><div class="option-row"><input class="new-poll-option" maxlength="180" required placeholder="Option 2"></div>`;
+        }
+        createPollForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const options = Array.from(newPollOptions.querySelectorAll(".new-poll-option"))
+                .map(input => input.value.trim()).filter(Boolean);
+            if (options.length < 2) return showMessage("Enter at least two answer options.", "error");
+            if (new Set(options.map(value => value.toLowerCase())).size !== options.length) return showMessage("Answer options must be unique.", "error");
+            const button = document.getElementById("savePollButton");
+            button.disabled = true; button.textContent = "Creating...";
+            const payload = { question: document.getElementById("newPollQuestion").value.trim(), options };
+            if (pollVillageWrap.style.display !== "none") payload.village_id = pollVillageSelect.value || null;
+            try {
+                await apiRequest("/polls", { method: "POST", body: JSON.stringify(payload) });
+                showMessage("Poll created successfully.");
+                createPollForm.reset(); resetPollOptionFields(); createPollPanel.classList.remove("open");
+                await loadPolls();
+            } catch (error) { showMessage(error.message, "error"); }
+            finally { button.disabled = false; button.textContent = "Create Poll"; }
+        });
+
         searchInput.addEventListener("input", renderPolls);
         statusFilter.addEventListener("change", renderPolls);
 
@@ -638,6 +751,7 @@
                 return;
             }
 
+            setupPollCreator();
             loadPolls();
         });
     </script>

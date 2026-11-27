@@ -26,6 +26,7 @@ const eventPollOrganizerMiddleware = [
                         SELECT 1
                         FROM volunteers v
                         WHERE v.user_id = u.id
+                          AND v.approved = 1
                     ) AS is_volunteer
                 FROM users u
                 WHERE u.id = ?

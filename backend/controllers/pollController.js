@@ -1,4 +1,3 @@
-
 const pool = require("../config/db");
 
 // ============================================
@@ -43,10 +42,10 @@ async function canAccessPoll(req, poll) {
 
     const villageId = await getUserVillageId(req.user.id);
 
-    return (
+    return Boolean(
         villageId &&
-        poll.village_id &&
-        Number(villageId) === Number(poll.village_id)
+        (poll.village_id === null ||
+         Number(villageId) === Number(poll.village_id))
     );
 }
 
@@ -133,7 +132,7 @@ exports.getPolls = async (req, res) => {
                 });
             }
 
-            query += ` WHERE p.village_id = ?`;
+            query += ` WHERE (p.village_id = ? OR p.village_id IS NULL)`;
             params.push(villageId);
         }
 
@@ -286,6 +285,19 @@ exports.createPoll = async (req, res) => {
                     success: false,
                     message: "Invalid village ID."
                 });
+            }
+
+            if (villageId !== null) {
+                const [villages] = await pool.execute(
+                    `SELECT id FROM villages WHERE id = ? LIMIT 1`,
+                    [villageId]
+                );
+                if (!villages.length) {
+                    return res.status(404).json({
+                        success: false,
+                        message: "Village not found."
+                    });
+                }
             }
         } else {
             // Every non-admin creator is restricted to their own village.

@@ -465,7 +465,16 @@
                     dashboardCard.style.display = "block";
                     usersCard.style.display = "block";
 
-                    // Admin opens Admin Analytics
+                    // Admin opens analytics for every village.
+                    analyticsCard.href = "/admin/analytics.html";
+
+                } else if (userRole === "official") {
+
+                    dashboardCard.style.display = "none";
+                    usersCard.style.display = "none";
+
+                    // Village officials use the management view; the API
+                    // limits the view and status updates to their own village.
                     analyticsCard.href = "/admin/analytics.html";
 
                 } else {
@@ -473,7 +482,7 @@
                     dashboardCard.style.display = "none";
                     usersCard.style.display = "none";
 
-                    // Residents and officials open regular Analytics
+                    // Residents retain the read-only analytics page.
                     analyticsCard.href = "/analytics.html";
                 }
 

@@ -1,5 +1,5 @@
-
 const pool = require("../config/db");
+const fs = require("fs");
 
 /*
 |--------------------------------------------------------------------------
@@ -115,6 +115,155 @@ async function getComplaintImages(complaintId) {
 
 /*
 |--------------------------------------------------------------------------
+| READ GPS COORDINATES FROM JPEG EXIF
+|--------------------------------------------------------------------------
+|
+| This small parser verifies that the uploaded JPEG actually contains GPS
+| EXIF metadata. It avoids trusting only latitude/longitude form fields.
+|
+*/
+
+function readJpegGpsExif(filePath) {
+    try {
+        const image = fs.readFileSync(filePath);
+
+        if (image.length < 4 || image[0] !== 0xFF || image[1] !== 0xD8) {
+            return null;
+        }
+
+        let offset = 2;
+
+        while (offset + 4 < image.length) {
+            if (image[offset] !== 0xFF) {
+                offset += 1;
+                continue;
+            }
+
+            while (offset < image.length && image[offset] === 0xFF) {
+                offset += 1;
+            }
+
+            const marker = image[offset];
+            offset += 1;
+
+            if (marker === 0xD9 || marker === 0xDA) break;
+            if (marker === 0x01 || (marker >= 0xD0 && marker <= 0xD7)) continue;
+            if (offset + 2 > image.length) break;
+
+            const segmentLength = image.readUInt16BE(offset);
+            const segmentStart = offset + 2;
+            const segmentEnd = offset + segmentLength;
+            if (segmentLength < 2 || segmentEnd > image.length) break;
+
+            const isExif = marker === 0xE1 &&
+                image.toString("ascii", segmentStart, segmentStart + 6) === "Exif\0\0";
+
+            if (isExif) {
+                const tiffStart = segmentStart + 6;
+                const byteOrder = image.toString("ascii", tiffStart, tiffStart + 2);
+                const littleEndian = byteOrder === "II";
+
+                if (!littleEndian && byteOrder !== "MM") return null;
+
+                const readUInt16 = (position) => littleEndian
+                    ? image.readUInt16LE(position)
+                    : image.readUInt16BE(position);
+                const readUInt32 = (position) => littleEndian
+                    ? image.readUInt32LE(position)
+                    : image.readUInt32BE(position);
+
+                if (readUInt16(tiffStart + 2) !== 42) return null;
+
+                const ifd0Offset = readUInt32(tiffStart + 4);
+                const ifd0 = tiffStart + ifd0Offset;
+                if (ifd0 + 2 > segmentEnd) return null;
+
+                const ifd0Count = readUInt16(ifd0);
+                let gpsIfdOffset = null;
+
+                for (let i = 0; i < ifd0Count; i += 1) {
+                    const entry = ifd0 + 2 + (i * 12);
+                    if (entry + 12 > segmentEnd) return null;
+                    if (readUInt16(entry) === 0x8825) {
+                        gpsIfdOffset = readUInt32(entry + 8);
+                        break;
+                    }
+                }
+
+                if (gpsIfdOffset === null) return null;
+
+                const gpsIfd = tiffStart + gpsIfdOffset;
+                if (gpsIfd + 2 > segmentEnd) return null;
+                const gpsCount = readUInt16(gpsIfd);
+                const gpsEntries = {};
+
+                for (let i = 0; i < gpsCount; i += 1) {
+                    const entry = gpsIfd + 2 + (i * 12);
+                    if (entry + 12 > segmentEnd) return null;
+
+                    const tag = readUInt16(entry);
+                    const type = readUInt16(entry + 2);
+                    const count = readUInt32(entry + 4);
+                    const valueOffset = entry + 8;
+                    gpsEntries[tag] = { type, count, valueOffset };
+                }
+
+                const readGpsRef = (tag) => {
+                    const item = gpsEntries[tag];
+                    if (!item || item.type !== 2 || item.count < 1) return null;
+                    return String.fromCharCode(image[item.valueOffset]);
+                };
+
+                const readGpsDms = (tag) => {
+                    const item = gpsEntries[tag];
+                    if (!item || item.type !== 5 || item.count !== 3) return null;
+
+                    const dataOffset = tiffStart + readUInt32(item.valueOffset);
+                    if (dataOffset + 24 > segmentEnd) return null;
+
+                    const values = [];
+                    for (let i = 0; i < 3; i += 1) {
+                        const numerator = readUInt32(dataOffset + (i * 8));
+                        const denominator = readUInt32(dataOffset + (i * 8) + 4);
+                        if (denominator === 0) return null;
+                        values.push(numerator / denominator);
+                    }
+
+                    return values[0] + (values[1] / 60) + (values[2] / 3600);
+                };
+
+                const latitudeRef = readGpsRef(1);
+                const longitudeRef = readGpsRef(3);
+                let exifLatitude = readGpsDms(2);
+                let exifLongitude = readGpsDms(4);
+
+                if (
+                    exifLatitude === null ||
+                    exifLongitude === null ||
+                    !["N", "S"].includes(latitudeRef) ||
+                    !["E", "W"].includes(longitudeRef)
+                ) {
+                    return null;
+                }
+
+                if (latitudeRef === "S") exifLatitude *= -1;
+                if (longitudeRef === "W") exifLongitude *= -1;
+
+                return { latitude: exifLatitude, longitude: exifLongitude };
+            }
+
+            offset = segmentEnd;
+        }
+
+        return null;
+    } catch (error) {
+        console.error("JPEG GPS EXIF validation error:", error.message);
+        return null;
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
 | HELPER - VALIDATE COMPLAINT ID
 |--------------------------------------------------------------------------
 */
@@ -174,6 +323,14 @@ exports.createComplaint = async (req, res) => {
             longitude
         } = req.body;
 
+        /* A complaint is accepted only with an uploaded photo. */
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "A problem photo is mandatory. Please upload a photo before submitting the complaint."
+            });
+        }
+
         const finalSeverity = severity || priority || "Medium";
 
         if (!description || !String(description).trim()) {
@@ -211,55 +368,66 @@ exports.createComplaint = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | GPS VALIDATION
+        | MANDATORY GPS VALIDATION
         |--------------------------------------------------------------------------
+        |
+        | Every complaint must have valid latitude and longitude. The frontend
+        | embeds these same coordinates into the uploaded JPEG EXIF GPS tags.
+        | The backend independently validates the coordinates so the frontend
+        | cannot be bypassed.
+        |
         */
 
-        let finalLatitude = null;
-        let finalLongitude = null;
-        let geoTagged = 0;
+        const parsedLatitude = Number(latitude);
+        const parsedLongitude = Number(longitude);
 
-        if (
+        const validLatitude =
             latitude !== undefined &&
             latitude !== null &&
-            latitude !== ""
-        ) {
-            const parsedLatitude = Number(latitude);
+            String(latitude).trim() !== "" &&
+            Number.isFinite(parsedLatitude) &&
+            parsedLatitude >= -90 &&
+            parsedLatitude <= 90;
 
-            if (
-                Number.isFinite(parsedLatitude) &&
-                parsedLatitude >= -90 &&
-                parsedLatitude <= 90
-            ) {
-                finalLatitude = parsedLatitude;
-            }
-        }
-
-        if (
+        const validLongitude =
             longitude !== undefined &&
             longitude !== null &&
-            longitude !== ""
-        ) {
-            const parsedLongitude = Number(longitude);
+            String(longitude).trim() !== "" &&
+            Number.isFinite(parsedLongitude) &&
+            parsedLongitude >= -180 &&
+            parsedLongitude <= 180;
 
-            if (
-                Number.isFinite(parsedLongitude) &&
-                parsedLongitude >= -180 &&
-                parsedLongitude <= 180
-            ) {
-                finalLongitude = parsedLongitude;
+        if (!validLatitude || !validLongitude) {
+            if (req.file && req.file.path) {
+                fs.unlink(req.file.path, () => {});
             }
+
+            return res.status(400).json({
+                success: false,
+                message: "Valid GPS latitude and longitude are mandatory. Please capture your location and submit the complaint again."
+            });
         }
 
-        if (
-            finalLatitude !== null &&
-            finalLongitude !== null
-        ) {
-            geoTagged = 1;
-        } else {
-            finalLatitude = null;
-            finalLongitude = null;
+        const finalLatitude = parsedLatitude;
+        const finalLongitude = parsedLongitude;
+
+        const photoGps = readJpegGpsExif(req.file.path);
+        const gpsMatchesPhoto = photoGps &&
+            Math.abs(photoGps.latitude - finalLatitude) <= 0.00001 &&
+            Math.abs(photoGps.longitude - finalLongitude) <= 0.00001;
+
+        if (!gpsMatchesPhoto) {
+            if (req.file && req.file.path) {
+                fs.unlink(req.file.path, () => {});
+            }
+
+            return res.status(400).json({
+                success: false,
+                message: "The uploaded photo is not GPS-tagged with the captured complaint location. Please try selecting the photo again and submit."
+            });
         }
+
+        const geoTagged = 1;
 
         const complaintNumber = await generateComplaintNumber();
 
@@ -319,24 +487,23 @@ exports.createComplaint = async (req, res) => {
         |--------------------------------------------------------------------------
         */
 
-        if (req.file) {
-            const imageUrl = `/uploads/${req.file.filename}`;
+        /* The photo is mandatory and is saved against this GPS-tagged complaint. */
+        const imageUrl = `/uploads/${req.file.filename}`;
 
-            await pool.execute(
-                `INSERT INTO complaint_images
-                (
-                    complaint_id,
-                    image_url,
-                    storage_public_id
-                )
-                VALUES (?, ?, ?)`,
-                [
-                    complaintId,
-                    imageUrl,
-                    req.file.filename
-                ]
-            );
-        }
+        await pool.execute(
+            `INSERT INTO complaint_images
+            (
+                complaint_id,
+                image_url,
+                storage_public_id
+            )
+            VALUES (?, ?, ?)`,
+            [
+                complaintId,
+                imageUrl,
+                req.file.filename
+            ]
+        );
 
         /*
         |--------------------------------------------------------------------------

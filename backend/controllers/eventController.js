@@ -33,8 +33,8 @@ async function canManageEvent(req, eventVillageId) {
     const villageId = await getSarpanchVillageId(req.user.id);
 
     return villageId !== null &&
-        eventVillageId !== null &&
-        Number(villageId) === Number(eventVillageId);
+        (eventVillageId === null ||
+         Number(villageId) === Number(eventVillageId));
 }
 
 async function canViewEvent(req, eventVillageId) {
@@ -72,7 +72,7 @@ exports.getEvents = async (req, res) => {
                 });
             }
 
-            sql += ` WHERE e.village_id = ?`;
+            sql += ` WHERE (e.village_id = ? OR e.village_id IS NULL)`;
             params.push(villageId);
         }
 
@@ -462,8 +462,8 @@ exports.registerForEvent = async (req, res) => {
 
         if (
             !villageId ||
-            !events[0].village_id ||
-            Number(villageId) !== Number(events[0].village_id)
+            (events[0].village_id !== null &&
+             Number(villageId) !== Number(events[0].village_id))
         ) {
             return res.status(403).json({
                 success: false,
